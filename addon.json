@@ -1,0 +1,13 @@
+{
+	"title"		:	"Doors",
+	"type"		:	"tool",
+	"tags"		:	[ "build", "realism" ],
+	"ignore"	:
+	[
+		"*.md",
+		"*.txt",
+		"*.git*",
+		"*.fgd",
+		"*.psd"
+	]
+}
