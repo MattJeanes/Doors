@@ -22,13 +22,14 @@ if SERVER then
 			else -- last resort, thanks SuperLlama (https://github.com/superllama/gravityhull/blob/9de1db246f4079a0965075e17ae8abf370b942f7/lua/gravityhull/sv_main.lua#L332-L342)
 				local nowhere = vector_origin
 				local max=16384
-				td.mask=MASK_SOLID + CONTENTS_WATER
+				local tries=10000
 				td.start=nowhere
 				td.endpos=nowhere
-				while not ((util.PointContents(nowhere)==CONTENTS_EMPTY or util.PointContents(nowhere)==CONTENTS_TESTFOGVOLUME)
+				while (not ((util.PointContents(nowhere)==CONTENTS_EMPTY or util.PointContents(nowhere)==CONTENTS_TESTFOGVOLUME)
 					and util.TraceHull(td).Hit
-					and self:CallHook("AllowInteriorPos",nil,nowhere,mins,maxs)~=false)
+					and self:CallHook("AllowInteriorPos",nil,nowhere,mins,maxs)~=false)) and tries>0
 				do
+					tries=tries-1
 					tr.start=nowhere
 					tr.endpos=nowhere
 					nowhere = Vector(math.random(-max,max),math.random(-max,max),math.random(-max,max))
