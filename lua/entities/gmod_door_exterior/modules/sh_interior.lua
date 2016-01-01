@@ -27,7 +27,8 @@ if SERVER then
 				td.endpos=nowhere
 				while (not ((util.PointContents(nowhere)==CONTENTS_EMPTY or util.PointContents(nowhere)==CONTENTS_TESTFOGVOLUME)
 					and util.TraceHull(td).Hit
-					and self:CallHook("AllowInteriorPos",nil,nowhere,mins,maxs)~=false)) and tries>0
+					and self:CallHook("AllowInteriorPos",nil,nowhere,mins,maxs)~=false))
+					and tries>0
 				do
 					tries=tries-1
 					tr.start=nowhere
@@ -52,7 +53,7 @@ if SERVER then
 		e:Activate()
 		local pos=FindPosition(self,e)
 		if not util.IsInWorld(pos,e) then
-			self:GetCreator():ChatPrint("WARNING: TARDIS unable to locate space for interior, respawn in open space or use a different map.")
+			self:GetCreator():ChatPrint("WARNING: Unable to locate space for interior, respawn in open space or use a different map.")
 			e:Remove()
 			return
 		end

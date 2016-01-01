@@ -30,12 +30,6 @@ end
 
 function ENT:Think()
 	if self._init then
-		self:CallHook("Think")
+		self:CallHook("Think",FrameTime())
 	end
 end
-
-hook.Add("PostDrawTranslucentRenderables", "TARDIS", function(...)
-	for k,v in pairs(ents.FindByClass("gmod_door_interior")) do
-		v:CallHook("PostDrawTranslucentRenderables",...)
-	end
-end)

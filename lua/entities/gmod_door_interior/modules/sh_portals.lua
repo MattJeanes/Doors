@@ -22,25 +22,26 @@ if SERVER then
 	end)
 	
 	ENT:AddHook("Initialize", "portals", function(self)
-		local data=self.Portals
-		if not data then return end
+		local int=self.Portal
+		local ext=self.exterior.Portal
+		if not (int and ext) then return end
 		self.portals={}
 		self.portals[1]=ents.Create("linked_portal_door")
 		self.portals[2]=ents.Create("linked_portal_door")
 		
-		self.portals[1]:SetWidth(data[1].width)
-		self.portals[1]:SetHeight(data[1].height)
-		self.portals[1]:SetPos(self.exterior:LocalToWorld(data[1].pos))
-		self.portals[1]:SetAngles(self.exterior:LocalToWorldAngles(data[1].ang))
+		self.portals[1]:SetWidth(ext.width)
+		self.portals[1]:SetHeight(ext.height)
+		self.portals[1]:SetPos(self.exterior:LocalToWorld(ext.pos))
+		self.portals[1]:SetAngles(self.exterior:LocalToWorldAngles(ext.ang))
 		self.portals[1]:SetExit(self.portals[2])
 		self.portals[1]:SetParent(self.exterior)
 		self.portals[1]:Spawn()
 		self.portals[1]:Activate()
 		
-		self.portals[2]:SetWidth(data[2].width)
-		self.portals[2]:SetHeight(data[2].height)
-		self.portals[2]:SetPos(self:LocalToWorld(data[2].pos))
-		self.portals[2]:SetAngles(self:LocalToWorldAngles(data[2].ang))
+		self.portals[2]:SetWidth(int.width)
+		self.portals[2]:SetHeight(int.height)
+		self.portals[2]:SetPos(self:LocalToWorld(int.pos))
+		self.portals[2]:SetAngles(self:LocalToWorldAngles(int.ang))
 		self.portals[2]:SetExit(self.portals[1])
 		self.portals[2]:SetParent(self)
 		self.portals[2]:Spawn()

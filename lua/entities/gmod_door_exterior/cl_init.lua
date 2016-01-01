@@ -12,11 +12,12 @@ if not meta.SetCreator and not meta.GetCreator then
 end
 
 function ENT:Draw()
-	self:DrawModel()
-	if WireLib then
-		Wire_Render(self)
-	end
-	if self._init then
+	if self._init and self:CallHook("ShouldDraw")~=false then
+		self:CallHook("PreDraw")
+		self:DrawModel()
+		if WireLib then
+			Wire_Render(self)
+		end
 		self:CallHook("Draw")
 	end
 end
@@ -29,6 +30,7 @@ net.Receive("Doors-Initialize", function(len)
 		ext.interior=int
 		ext:SetCreator(ply)
 		ext.phys=ext:GetPhysicsObject()
+		ext:CallHook("PlayerInitialize")
 		ext:CallHook("Initialize")
 		ext._init=true
 	end
@@ -39,6 +41,6 @@ end
 
 function ENT:Think()
 	if self._init then
-		self:CallHook("Think")
+		self:CallHook("Think",FrameTime())
 	end
 end

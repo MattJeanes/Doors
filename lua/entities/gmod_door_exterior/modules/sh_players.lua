@@ -8,6 +8,9 @@ if SERVER then
 		if self.occupants[ply] then
 			return --TODO: Handle properly
 		end
+		if self:CallHook("CanPlayerEnter")==false then
+			return
+		end
 		if IsValid(ply.door) and ply.door~=self then
 			ply.door:PlayerExit(ply,true,true)
 		end
@@ -21,15 +24,12 @@ if SERVER then
 			local portals=self.interior.portals
 			if (not notp) and portals and self.interior.Fallback then
 				local pos=self:WorldToLocal(ply:GetPos())
-				ply:SetPos(self.interior:LocalToWorld(self.interior.Fallback))
+				ply:SetPos(self.interior:LocalToWorld(self.interior.Fallback.pos))
 				local ang=wp.TransformPortalAngle(ply:EyeAngles(),portals[1],portals[2])
 				local fwd=wp.TransformPortalAngle(ply:GetVelocity():Angle(),portals[1],portals[2]):Forward()
 				ply:SetEyeAngles(Angle(ang.p,ang.y,0))
 				ply:SetLocalVelocity(fwd*ply:GetVelocity():Length())
 			end
-		else
-			ply:Spectate(OBS_MODE_ROAMING)
-			self:PlayerThirdPerson(ply,true)
 		end
 		self:CallHook("PlayerEnter", ply, notp)
 		if IsValid(self.interior) then
@@ -38,6 +38,9 @@ if SERVER then
 	end
 
 	function ENT:PlayerExit(ply,forced,notp)
+		if self:CallHook("CanPlayerExit")==false and (not forced) then
+			return
+		end
 		self:CallHook("PlayerExit", ply, forced, notp)
 		if IsValid(self.interior) then
 			self.interior:CallHook("PlayerExit", ply, forced, notp)
@@ -88,7 +91,7 @@ if SERVER then
 			net.WriteEntity(self.interior)
 		net.Send(ply)
 		if not notp and self.Fallback then
-			ply:SetPos(self:LocalToWorld(self.Fallback))
+			ply:SetPos(self:LocalToWorld(self.Fallback.pos))
 			if IsValid(self.interior) then
 				local portals=self.interior.portals
 				if (not forced) and portals then

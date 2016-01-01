@@ -42,10 +42,8 @@ function ENT:Initialize()
 		self.phys:Wake()
 	end
 	
-	self:SetBodygroup(1,1) -- Sticker
-	self:SetBodygroup(2,1) -- Lit sign
-	
 	self.occupants={}
+	self.lastthink=CurTime()
 	
 	self:CallHook("Initialize")
 end
@@ -61,5 +59,10 @@ function ENT:Think()
 		end
 	end
 	
-	self:CallHook("Think")
+	self:CallHook("Think",CurTime()-self.lastthink)
+	self.lastthink=CurTime()
+	if self:CallHook("ShouldThinkFast") then
+		self:NextThink(CurTime())
+		return true
+	end
 end

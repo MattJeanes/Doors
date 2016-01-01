@@ -49,6 +49,7 @@ function ENT:Initialize()
 		
 		self.occupants = {}
 		self.stuckfilter = {}
+		self.lastthink=CurTime()
 	else
 		self:CallHook("Initialize")
 	end
@@ -60,5 +61,10 @@ function ENT:Think()
 			self.occupants[k]=nil
 		end
 	end
-	self:CallHook("Think")
+	self:CallHook("Think",CurTime()-self.lastthink)
+	self.lastthink=CurTime()
+	if self:CallHook("ShouldThinkFast") then
+		self:NextThink(CurTime())
+		return true
+	end
 end
