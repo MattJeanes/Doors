@@ -5,8 +5,8 @@ if SERVER then
 		local td={}
 		td.start=self:GetPos()+Vector(0,0,99999999)
 		td.endpos=self:GetPos()
-		td.mins=e:OBBMins()
-		td.maxs=e:OBBMaxs()
+		td.mins=e.mins or e:OBBMins()
+		td.maxs=e.maxs or e:OBBMaxs()
 		td.filter={self,e}
 		td.mask = MASK_NPCWORLDSTATIC
 		local tr=util.TraceHull(td)
@@ -51,6 +51,7 @@ if SERVER then
 		end
 		e:Spawn()
 		e:Activate()
+		e:CallHook("PreInitialize")
 		local pos=FindPosition(self,e)
 		if not util.IsInWorld(pos,e) then
 			self:GetCreator():ChatPrint("WARNING: Unable to locate space for interior, respawn in open space or use a different map.")

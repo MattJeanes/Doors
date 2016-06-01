@@ -5,7 +5,7 @@ if SERVER then
 		local pos=self:GetPos()
 		for k,v in pairs(self.occupants) do
 			local exit
-			if self.ExitBox and (not k:GetPos():WithinAABox(self.ExitBox.Min,self.ExitBox.Max)) then
+			if self.ExitBox and (not k:GetPos():WithinAABox(self:LocalToWorld(self.ExitBox.Min),self:LocalToWorld(self.ExitBox.Max))) then
 				exit=true
 			elseif self.ExitDistance and k:GetPos():Distance(pos) > self.ExitDistance then
 				exit=true
