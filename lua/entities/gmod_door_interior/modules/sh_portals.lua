@@ -21,7 +21,7 @@ if SERVER then
 		end
 	end)
 	
-	ENT:AddHook("Initialize", "portals", function(self)
+	ENT:AddHook("PreInitialize", "portals", function(self)
 		local int=self.Portal
 		local ext=self.exterior.Portal
 		if not (int and ext) then return end
@@ -80,7 +80,7 @@ else
 	
 	hook.Add("wp-shouldrender", "doors-portals", function(portal,exit,origin)
 		local p=portal:GetParent()
-		if IsValid(p) and p.DoorInterior and p._init and LocalPlayer().doori~=p then
+		if IsValid(p) and ((p.DoorInterior and p._init and LocalPlayer().doori~=p) or (not p._init)) then
 			return false
 		end
 	end)
