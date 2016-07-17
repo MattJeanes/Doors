@@ -34,9 +34,20 @@ net.Receive("Doors-Initialize", function(len)
 		ext.interior=int
 		ext:SetCreator(ply)
 		ext.phys=ext:GetPhysicsObject()
+		ext._ready=true
+		if IsValid(int) then
+			ext._init=int._ready
+			int._init=ext._init
+		else
+			ext._init = true
+		end
 		ext:CallHook("PlayerInitialize")
-		ext:CallHook("Initialize")
-		ext._init=true
+		if ext._init then
+			ext:CallHook("Initialize")
+			if IsValid(int) then
+				int:CallHook("Initialize")
+			end
+		end
 	end
 end)
 function ENT:Initialize()

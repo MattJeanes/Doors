@@ -3,7 +3,7 @@ AddCSLuaFile('shared.lua')
 include('shared.lua')
 
 function ENT:SpawnFunction( ply, tr, ClassName )
-	if (  !tr.Hit ) then return end
+	if not tr.Hit then return end
 	local SpawnPos = tr.HitPos + tr.HitNormal
 	local ent = ents.Create( ClassName )
 	ent:SetPos( SpawnPos )
@@ -15,17 +15,34 @@ function ENT:SpawnFunction( ply, tr, ClassName )
 	return ent
 end
 
+function ENT:InitializePlayer(ply)
+	net.Start("Doors-Initialize")
+		net.WriteEntity(self)
+		net.WriteEntity(self.interior)
+		net.WriteEntity(self:GetCreator())
+		self:CallHook("PlayerInitialize",ply)
+	net.Send(ply)
+	self:CallHook("PostPlayerInitialize",ply)
+end
+
 util.AddNetworkString("Doors-Initialize")
 net.Receive("Doors-Initialize", function(len,ply)
 	local ext=net.ReadEntity()
 	if IsValid(ext) then
-		net.Start("Doors-Initialize")
-			net.WriteEntity(ext)
-			net.WriteEntity(ext.interior)
-			net.WriteEntity(ext:GetCreator())
-			ext:CallHook("PlayerInitialize",ply)
-		net.Send(ply)
-		ext:CallHook("PostPlayerInitialize",ply)
+		if ext.intready then
+			ext:InitializePlayer(ply)
+		else
+			ext.initqueue[ply]=true
+		end
+	end
+end)
+
+ENT:AddHook("InteriorReady","interior",function(self)
+	if self.initqueue then
+		for k,v in pairs(self.initqueue) do
+			self:InitializePlayer(k)
+		end
+		self.initqueue=nil
 	end
 end)
 
@@ -43,9 +60,11 @@ function ENT:Initialize()
 	end
 	
 	self.occupants={}
+	self.initqueue={}
 	self.lastthink=CurTime()
 	
 	self:CallHook("Initialize")
+	self:CallHook("PostInitialize")
 end
 
 function ENT:PhysicsUpdate(ph)

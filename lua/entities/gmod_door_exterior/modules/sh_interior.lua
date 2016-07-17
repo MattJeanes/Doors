@@ -2,15 +2,24 @@
 
 if SERVER then
 	function ENT:FindPosition(e)
+		local creator=e:GetCreator()
+		creator:ChatPrint("Please wait, finding suitable spawn location for interior..")
+		coroutine.yield()
 		local td={}
 		td.mins=e.mins or e:OBBMins()
 		td.maxs=e.maxs or e:OBBMaxs()		
 		local max=16384
 		local tries=10000
+		local targetframetime=0.02
 		local nowhere
 		local highest
+		local start=SysTime()
 		while tries>0 do
 			tries=tries-1
+			if (SysTime()-start)>targetframetime then
+				coroutine.yield()
+				start=SysTime()
+			end
 			nowhere=Vector(math.random(-max,max),math.random(-max,max),math.random(-max,max))
 			td.start=nowhere
 			td.endpos=nowhere
@@ -24,6 +33,44 @@ if SERVER then
 		return highest
 	end
 	
+	ENT:AddHook("ShouldThinkFast","interior",function(self)
+		if self.findingpos then
+			return true
+		end
+	end)
+	
+	ENT:AddHook("Think","interior",function(self)
+		if self.findingpos then
+			local success,res=coroutine.resume(self.findingpos)
+			if coroutine.status(self.findingpos)=="dead" or (not success) then
+				self.findingpos=nil
+				local creator = self:GetCreator()
+				if not success or not res then
+					if res then
+						creator:ChatPrint("Coroutine error while finding position: "..res)
+					else
+						creator:ChatPrint("WARNING: Unable to locate space for interior, you can try again or use a different map.")
+					end
+					self.interior:Remove()
+					self.interior=nil
+					self.intready=true
+					self:CallHook("InteriorReady",false)
+					return
+				end
+				creator:ChatPrint("Done!")
+				self.interior:SetPos(res)
+				self:DeleteOnRemove(self.interior)
+				self.interior:DeleteOnRemove(self)
+				self.interior.occupants=self.occupants -- Hooray for referenced tables
+				self.interior=self.interior
+				self.interior.spacecheck=nil
+				self.interior:Initialize()
+				self.intready=true
+				self:CallHook("InteriorReady",self.interior)
+			end
+		end
+	end)
+	
 	ENT:AddHook("Initialize", "interior", function(self)
 		local e=ents.Create(self.Interior)
 		e.spacecheck=true
@@ -36,19 +83,9 @@ if SERVER then
 		e:Spawn()
 		e:Activate()
 		e:CallHook("PreInitialize")
-		local pos=self:FindPosition(e)
-		if not pos then
-			self:GetCreator():ChatPrint("WARNING: Unable to locate space for interior, respawn in open space or use a different map.")
-			e:Remove()
-			return
-		end
-		e:SetPos(pos)
-		self:DeleteOnRemove(e)
-		e:DeleteOnRemove(self)
-		e.occupants=self.occupants -- Hooray for referenced tables
 		self.interior=e
-		e.spacecheck=nil
-		e:Initialize()
+		self.findingpos = coroutine.create(self.FindPosition)
+		coroutine.resume(self.findingpos,self,e)
 	end)
 	
 	ENT:AddHook("OnRemove", "interior", function(self)
