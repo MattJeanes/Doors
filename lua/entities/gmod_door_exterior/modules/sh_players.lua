@@ -20,6 +20,8 @@ if SERVER then
 			net.WriteEntity(self)
 			net.WriteEntity(self.interior)
 		net.Send(ply)
+		ply.door = self
+		ply.doori = self.interior
 		if IsValid(self.interior) then
 			local portals=self.interior.portals
 			if (not notp) and portals and self.interior.Fallback then
@@ -83,13 +85,15 @@ if SERVER then
 			end
 			ply.doors_cooldowncur=CurTime()+1
 		end
-		if ply:InVehicle() then ply:ExitVehicle() end
+		--if ply:InVehicle() then ply:ExitVehicle() end
 		self.occupants[ply]=nil
 		net.Start("Doors-EnterExit")
 			net.WriteBool(false)
 			net.WriteEntity(self)
 			net.WriteEntity(self.interior)
 		net.Send(ply)
+		ply.door = nil
+		ply.doori = nil
 		if not notp and self.Fallback then
 			ply:SetPos(self:LocalToWorld(self.Fallback.pos))
 			if IsValid(self.interior) then

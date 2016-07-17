@@ -27,7 +27,9 @@ end)
 ENT:AddHook("Initialize", "cordon", function(self)
 	self.props={}
 	self.propscan=0
-	self.mins,self.maxs=self:LocalToWorld(self:OBBMins()*0.95), self:LocalToWorld(self:OBBMaxs()*0.95)
+	if not (self.mins and self.maxs) then
+		self.mins,self.maxs=self:OBBMins()*0.95, self:OBBMaxs()*0.95
+	end
 end)
 
 local blacklist={
@@ -40,8 +42,9 @@ ENT:AddHook("Cordon", "cordon", function(self,class,ent)
 end)
 
 function ENT:UpdateCordon()
-	local inside=LocalPlayer().doori==self
-	for k,v in pairs(ents.FindInBox(self.mins,self.maxs)) do
+	local inside=LocalPlayer().doori==self or self.contains[LocalPlayer().door]
+	print(self,LocalPlayer().doori,self.exterior.insideof,inside)
+	for k,v in pairs(ents.FindInBox(self:LocalToWorld(self.mins),self:LocalToWorld(self.maxs))) do
 		local check=true
 		local class=v:GetClass()
 		if blacklist[class] or self:CallHook("Cordon",class,v)==false then
@@ -56,11 +59,11 @@ function ENT:UpdateCordon()
 		end
 		if check then
 			--if not self.props[v] then
-			--	print("enter",v)
+				--print("enter",v)
 			--end
 			self.props[v]=1
-			if v.tardis_cordon==nil then
-				v.tardis_cordon=v:GetNoDraw()
+			if v.doors_cordon==nil then
+				v.doors_cordon=v:GetNoDraw()
 			end
 			if v:GetNoDraw()==inside then
 				v:SetNoDraw(not inside)
@@ -70,8 +73,8 @@ function ENT:UpdateCordon()
 	for k,v in pairs(self.props) do
 		if IsValid(k) then
 			if v==true then -- left
-				k:SetNoDraw(k.tardis_cordon)
-				k.tardis_cordon=nil
+				k:SetNoDraw(k.doors_cordon)
+				k.doors_cordon=nil
 				self.props[k]=nil
 				--print("exit",k)
 			elseif v==1 then
@@ -88,8 +91,8 @@ ENT:AddHook("OnRemove", "cordon", function(self)
 		for k,v in pairs(self.props) do
 			if IsValid(k) then
 				--print("onremove",k)
-				k:SetNoDraw(k.tardis_cordon)
-				k.tardis_cordon=nil
+				k:SetNoDraw(k.doors_cordon)
+				k.doors_cordon=nil
 				self.props[k]=nil
 			end
 		end

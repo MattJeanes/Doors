@@ -35,6 +35,8 @@ if SERVER then
 		self.portals[1]:SetAngles(self.exterior:LocalToWorldAngles(ext.ang))
 		self.portals[1]:SetExit(self.portals[2])
 		self.portals[1]:SetParent(self.exterior)
+		self.portals[1].exterior = self.exterior
+		self.portals[1].interior = self
 		self.portals[1]:Spawn()
 		self.portals[1]:Activate()
 		
@@ -44,42 +46,34 @@ if SERVER then
 		self.portals[2]:SetAngles(self:LocalToWorldAngles(int.ang))
 		self.portals[2]:SetExit(self.portals[1])
 		self.portals[2]:SetParent(self)
+		self.portals[2].interior = self
+		self.portals[2].exterior = self.exterior
 		self.portals[2]:Spawn()
 		self.portals[2]:Activate()
-		
-		self.portals[1].TPHook = function(s,ent)
-			if ent:IsPlayer() then
-				self.exterior:PlayerEnter(ent,true)
-				if self:IsStuck(ent) then
-					self.exterior:PlayerExit(ent)
-					self.exterior:PlayerEnter(ent)
-				end
-			end
-		end
-		
-		self.portals[2].TPHook = function(s,ent)
-			if ent:IsPlayer() then
-				self.exterior:PlayerExit(ent,false,true)
-				if self:IsStuck(ent) then
-					self.exterior:PlayerEnter(ent)
-					self.exterior:PlayerExit(ent)
-				end
-			end
-		end
 	end)
 else
+	ENT:AddHook("Initialize","interior",function(self)
+		self.contains = {}
+	end)
+	
 	ENT:AddHook("PlayerInitialize", "portals", function(self)
 		local portal1=net.ReadEntity()
 		local portal2=net.ReadEntity()
 		if IsValid(portal1) and IsValid(portal2) then
 			self.portals={}
 			self.portals[1]=portal1
+			self.portals[1].exterior=self.exterior
+			self.portals[1].interior=self
+			
 			self.portals[2]=portal2
+			self.portals[2].exterior=self.exterior
+			self.portals[2].interior=self
 		end
 	end)
 	
 	ENT:AddHook("ShouldDraw", "portals", function(self)
-		if wp.drawing and wp.drawingent and wp.drawingent:GetParent()~=self.exterior then
+		local insideof = IsValid(wp.drawingent) and wp.drawingent.exterior and wp.drawingent.exterior.insideof==self and wp.drawingent.interior.portals[2]==wp.drawingent
+		if wp.drawing and wp.drawingent and wp.drawingent~=self.portals[1] and not (wp.drawingent==self.portals[2] and self.props[self.exterior]) and (not insideof) then
 			return false
 		end
 	end)

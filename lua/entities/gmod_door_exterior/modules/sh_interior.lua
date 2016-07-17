@@ -1,43 +1,27 @@
 -- Adds an interior
 
 if SERVER then
-	local function FindPosition(self,e)
+	function ENT:FindPosition(e)
 		local td={}
-		td.start=self:GetPos()+Vector(0,0,99999999)
-		td.endpos=self:GetPos()
 		td.mins=e.mins or e:OBBMins()
-		td.maxs=e.maxs or e:OBBMaxs()
-		td.filter={self,e}
-		td.mask = MASK_NPCWORLDSTATIC
-		local tr=util.TraceHull(td)
-		if util.IsInWorld(tr.HitPos) then -- single trace worked
-			return tr.HitPos
-		else -- double trace needed
-			td.start=tr.HitPos+Vector(0,0,-6000)
-			td.endpos=tr.HitPos
-			td.mask = nil
-			tr=util.TraceHull(td)
-			if util.IsInWorld(tr.HitPos) then
-				return tr.HitPos
-			else -- last resort, thanks SuperLlama (https://github.com/superllama/gravityhull/blob/9de1db246f4079a0965075e17ae8abf370b942f7/lua/gravityhull/sv_main.lua#L332-L342)
-				local nowhere = vector_origin
-				local max=16384
-				local tries=10000
-				td.start=nowhere
-				td.endpos=nowhere
-				while (not ((util.PointContents(nowhere)==CONTENTS_EMPTY or util.PointContents(nowhere)==CONTENTS_TESTFOGVOLUME)
-					and util.TraceHull(td).Hit
-					and self:CallHook("AllowInteriorPos",nil,nowhere,mins,maxs)~=false))
-					and tries>0
-				do
-					tries=tries-1
-					tr.start=nowhere
-					tr.endpos=nowhere
-					nowhere = Vector(math.random(-max,max),math.random(-max,max),math.random(-max,max))
-				end
-				return nowhere
+		td.maxs=e.maxs or e:OBBMaxs()		
+		local max=16384
+		local tries=10000
+		local nowhere
+		local highest
+		while tries>0 do
+			tries=tries-1
+			nowhere=Vector(math.random(-max,max),math.random(-max,max),math.random(-max,max))
+			td.start=nowhere
+			td.endpos=nowhere
+			if (not util.TraceHull(td).Hit)
+				and (self:CallHook("AllowInteriorPos",nil,nowhere,mins,maxs)~=false)
+				and ((not highest) or (highest and nowhere.z>highest.z))
+			then
+				highest = nowhere
 			end
 		end
+		return highest
 	end
 	
 	ENT:AddHook("Initialize", "interior", function(self)
@@ -52,8 +36,8 @@ if SERVER then
 		e:Spawn()
 		e:Activate()
 		e:CallHook("PreInitialize")
-		local pos=FindPosition(self,e)
-		if not util.IsInWorld(pos,e) then
+		local pos=self:FindPosition(e)
+		if not pos then
 			self:GetCreator():ChatPrint("WARNING: Unable to locate space for interior, respawn in open space or use a different map.")
 			e:Remove()
 			return
@@ -70,6 +54,38 @@ if SERVER then
 	ENT:AddHook("OnRemove", "interior", function(self)
 		for k,v in pairs(self.occupants) do
 			self:PlayerExit(k,true)
+			for int in pairs(Doors:GetInteriors()) do
+				int:CheckPlayer(k)
+			end
+		end
+	end)
+else	
+	ENT:AddHook("SlowThink","interior",function(self)
+		local inside
+		for k,v in pairs(Doors:GetInteriors()) do
+			if k:PositionInside(self:GetPos()) then
+				inside=k
+				break
+			end
+		end
+		if IsValid(inside) then
+			if self.insideof~=inside then
+				if IsValid(self.insideof) and self.insideof.contains then
+					self.insideof.contains[self] = nil
+				end
+				self.insideof=inside
+			end
+			if inside.contains then
+				inside.contains[self] = true
+			end
+		end
+	end)
+	
+	ENT:AddHook("OnRemove","interior",function(self)
+		for k,v in pairs(Doors:GetInteriors()) do
+			if k.contains and k.contains[self] then
+				k.contains[self] = nil
+			end
 		end
 	end)
 end

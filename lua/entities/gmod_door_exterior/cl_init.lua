@@ -41,10 +41,15 @@ net.Receive("Doors-Initialize", function(len)
 end)
 function ENT:Initialize()
 	net.Start("Doors-Initialize") net.WriteEntity(self) net.SendToServer()
+	self.nextslowthink=0
 end
 
 function ENT:Think()
 	if self._init then
 		self:CallHook("Think",FrameTime())
+		if CurTime()>=self.nextslowthink then
+			self.nextslowthink=CurTime()+1
+			self:CallHook("SlowThink")
+		end
 	end
 end
