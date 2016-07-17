@@ -71,13 +71,16 @@ else
 		if IsValid(inside) then
 			if self.insideof~=inside then
 				if IsValid(self.insideof) and self.insideof.contains then
-					self.insideof.contains[self] = nil
+					self.insideof.contains[self]=nil
 				end
 				self.insideof=inside
 			end
 			if inside.contains then
-				inside.contains[self] = true
+				inside.contains[self]=true
 			end
+		elseif IsValid(self.insideof) and self.insideof.contains then
+			self.insideof.contains[self]=nil
+			self.insideof=nil
 		end
 	end)
 	
