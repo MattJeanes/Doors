@@ -43,7 +43,6 @@ end)
 
 function ENT:UpdateCordon()
 	local inside=LocalPlayer().doori==self or self.contains[LocalPlayer().door]
-	print(self,LocalPlayer().doori,self.exterior.insideof,inside)
 	for k,v in pairs(ents.FindInBox(self:LocalToWorld(self.mins),self:LocalToWorld(self.maxs))) do
 		local check=true
 		local class=v:GetClass()
