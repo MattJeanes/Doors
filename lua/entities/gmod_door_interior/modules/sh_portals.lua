@@ -1,19 +1,6 @@
 -- Handles portals for rendering, thanks to bliptec (http://facepunch.com/member.php?u=238641) for being a babe
 
-if SERVER then
-	function ENT:IsStuck(ply)
-		if ply:GetMoveType()==MOVETYPE_NOCLIP then return false end
-		local pos=ply:GetPos()
-		local td={}
-		td.start=pos
-		td.endpos=pos
-		td.mins=ply:OBBMins()
-		td.maxs=ply:OBBMaxs()
-		td.filter={ply,unpack(self.stuckfilter)}
-		local tr=util.TraceHull(td)
-		return tr.Hit
-	end
-	
+if SERVER then	
 	ENT:AddHook("PlayerInitialize", "portals", function(self)
 		if self.portals then
 			net.WriteEntity(self.portals[1])
