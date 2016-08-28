@@ -67,7 +67,7 @@ else
 	
 	hook.Add("wp-shouldrender", "doors-portals", function(portal,exit,origin)
 		local p=portal:GetParent()
-		if IsValid(p) and ((p.DoorInterior and p._init and LocalPlayer().doori~=p) or (not p._init)) then
+		if IsValid(p) and p.DoorInterior and ((p._init and LocalPlayer().doori~=p) or (not p._init)) then
 			return false
 		end
 	end)
