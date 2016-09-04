@@ -1,16 +1,5 @@
 include('shared.lua')
 
-local meta=FindMetaTable("Entity")
-if not meta.SetCreator and not meta.GetCreator then
-	function meta:SetCreator(creator)
-		self._creator=creator
-	end
-
-	function meta:GetCreator(creator)
-		return self._creator
-	end
-end
-
 function ENT:Draw()
 	if self._init and self:CallHook("ShouldDraw")~=false then
 		self:CallHook("PreDraw")
@@ -32,7 +21,7 @@ net.Receive("Doors-Initialize", function(len)
 	local ply=net.ReadEntity()
 	if IsValid(ext) and IsValid(ply) then
 		ext.interior=int
-		ext:SetCreator(ply)
+		Doors:SetupOwner(ext,ply)
 		ext.phys=ext:GetPhysicsObject()
 		ext._ready=true
 		if IsValid(int) then

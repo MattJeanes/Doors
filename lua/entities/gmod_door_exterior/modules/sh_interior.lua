@@ -10,7 +10,7 @@ if SERVER then
 		td.maxs=e.maxs or e:OBBMaxs()		
 		local max=16384
 		local tries=10000
-		local targetframetime=0.02
+		local targetframetime=1/30
 		local nowhere
 		local highest
 		local start=SysTime()
@@ -23,9 +23,9 @@ if SERVER then
 			nowhere=Vector(math.random(-max,max),math.random(-max,max),math.random(-max,max))
 			td.start=nowhere
 			td.endpos=nowhere
-			if (not util.TraceHull(td).Hit)
+			if ((not highest) or (highest and nowhere.z>highest.z))
+				and (not util.TraceHull(td).Hit)
 				and (self:CallHook("AllowInteriorPos",nil,nowhere,mins,maxs)~=false)
-				and ((not highest) or (highest and nowhere.z>highest.z))
 			then
 				highest = nowhere
 			end
@@ -76,10 +76,7 @@ if SERVER then
 		e.spacecheck=true
 		e.exterior=self
 		e.ID=self.ID
-		e:SetCreator(self:GetCreator())
-		if CPPI then
-			e:CPPISetOwner(self:GetCreator())
-		end
+		Doors:SetupOwner(e,self:GetCreator())
 		e:Spawn()
 		e:Activate()
 		e:CallHook("PreInitialize")
