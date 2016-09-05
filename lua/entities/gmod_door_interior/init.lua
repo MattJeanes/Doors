@@ -6,10 +6,10 @@ function ENT:SpawnFunction( ply, tr, ClassName )
 	if not tr.Hit then return end
 	local SpawnPos = tr.HitPos + tr.HitNormal
 	local ent = ents.Create( ClassName )
-	ent:SetPos( SpawnPos )
+	ent:SetPos(SpawnPos)
 	local ang=Angle(0, (ply:GetPos()-SpawnPos):Angle().y, 0)
-	ent:SetAngles( ang )
-	ent:SetCreator( ply )
+	ent:SetAngles(ang)
+	Doors:SetupOwner(ply)
 	ent:Spawn()
 	ent:Activate()
 	return ent

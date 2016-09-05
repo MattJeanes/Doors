@@ -6,9 +6,9 @@ if SERVER then
 	function ENT:PlayerEnter(ply,notp)
 		if ply.doors_cooldowncur and ply.doors_cooldowncur>CurTime() then return end
 		if self.occupants[ply] then
-			return --TODO: Handle properly
+			return
 		end
-		if self:CallHook("CanPlayerEnter")==false then
+		if self:CallHook("CanPlayerEnter",ply)==false then
 			return
 		end
 		if IsValid(ply.door) and ply.door~=self then
@@ -40,7 +40,7 @@ if SERVER then
 	end
 
 	function ENT:PlayerExit(ply,forced,notp)
-		if self:CallHook("CanPlayerExit")==false and (not forced) then
+		if self:CallHook("CanPlayerExit",ply)==false and (not forced) then
 			return
 		end
 		self:CallHook("PlayerExit", ply, forced, notp)
@@ -107,6 +107,15 @@ if SERVER then
 			end
 		end
 	end
+	
+	hook.Add("wp-shouldtp", "doors-players", function(self,ent)
+		local e=self:GetParent()
+		if IsValid(e) and IsValid(ent) and ent:IsPlayer() and (e.DoorExterior or e.DoorInterior) then
+			if (e.DoorExterior and e or e.exterior):CallHook(e.DoorExterior and "CanPlayerEnter" or "CanPlayerExit",ent)==false then
+				return false
+			end
+		end
+	end)
 else	
 	net.Receive("Doors-EnterExit", function()
 		local enter=net.ReadBool()
