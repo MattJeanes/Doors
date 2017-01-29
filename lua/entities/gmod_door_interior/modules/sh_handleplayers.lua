@@ -28,7 +28,7 @@ if SERVER then
 		if self.occupants[ply] and not inbox then
 			--print("out",self,ply,ply.door,ply.doori)
 			self.exterior:PlayerExit(ply,true,IsValid(portal))
-			if IsValid(portal) and portal==self.portals[2] and self:IsStuck(ply) then
+			if IsValid(portal) and portal==self.portals.interior and self:IsStuck(ply) then
 				--print("stuck out",self,ply,portal)
 				self.exterior:PlayerEnter(ply)
 				self.exterior:PlayerExit(ply)
@@ -39,7 +39,7 @@ if SERVER then
 		elseif not self.occupants[ply] and inbox then
 			--print("in",self,ply,ply:GetPos())
 			self.exterior:PlayerEnter(ply,true)
-			if IsValid(portal) and portal==self.portals[1] and self:IsStuck(ply) then
+			if IsValid(portal) and portal==self.portals.exterior and self:IsStuck(ply) then
 				--print("stuck in",self,ply,portal)
 				self.exterior:PlayerExit(ply)
 				self.exterior:PlayerEnter(ply)
