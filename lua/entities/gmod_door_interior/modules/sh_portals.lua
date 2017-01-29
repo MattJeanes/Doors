@@ -71,4 +71,18 @@ else
 			return false
 		end
 	end)
+	
+	hook.Add("wp-predraw","doors-portals",function(portal)
+		local p=portal:GetParent()
+		if IsValid(p) and (p.TardisExterior or p.TardisInterior) and p._init then
+			p:CallHook("PreDrawPortal")
+		end
+	end)
+	
+	hook.Add("wp-postdraw","doors-portals",function(portal)
+		local p=portal:GetParent()
+		if IsValid(p) and (p.TardisExterior or p.TardisInterior) and p._init then
+			p:CallHook("PostDrawPortal")
+		end
+	end)
 end

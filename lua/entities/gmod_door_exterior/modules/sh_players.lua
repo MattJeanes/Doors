@@ -8,7 +8,8 @@ if SERVER then
 		if self.occupants[ply] then
 			return
 		end
-		if self:CallHook("CanPlayerEnter",ply)==false then
+		local allowed,allowforced = self:CallHook("CanPlayerEnter",ply)
+		if allowed==false and not allowforced then
 			return
 		end
 		if IsValid(ply.door) and ply.door~=self then
