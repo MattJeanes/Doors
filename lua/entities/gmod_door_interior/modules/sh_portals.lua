@@ -5,15 +5,20 @@ if SERVER then
 		if self.portals then
 			net.WriteEntity(self.portals.exterior)
 			net.WriteEntity(self.portals.interior)
-			net.WriteInt(table.Count(self.customportals),8)
-			for k,v in pairs(self.customportals) do
-				net.WriteString(k)
+			if self.customportals then
+				net.WriteBool(true)
+				net.WriteInt(table.Count(self.customportals),8)
+				for k,v in pairs(self.customportals) do
+					net.WriteString(k)
 				
-				net.WriteEntity(v.entry)
-				net.WriteBool(v.entry.black)
+					net.WriteEntity(v.entry)
+					net.WriteBool(v.entry.black)
 				
-				net.WriteEntity(v.exit)
-				net.WriteBool(v.exit.black)
+					net.WriteEntity(v.exit)
+					net.WriteBool(v.exit.black)
+				end
+			else
+				net.WriteBool(false)
 			end
 		end
 	end)
@@ -48,36 +53,49 @@ if SERVER then
 		self.portals.interior:Spawn()
 		self.portals.interior:Activate()
 		
-		self.customportals={}
-		for k,v in pairs(self.CustomPortals) do
-			self.customportals[k] = {}
-			local portals = self.customportals[k]
-			portals.entry=ents.Create("linked_portal_door")
-			portals.exit=ents.Create("linked_portal_door")
-			
-			portals.entry:SetWidth(v.entry.width)
-			portals.entry:SetHeight(v.entry.height)
-			portals.entry:SetPos(self:LocalToWorld(v.entry.pos))
-			portals.entry:SetAngles(self:LocalToWorldAngles(v.entry.ang))
-			portals.entry:SetExit(portals.exit)
-			portals.entry:SetParent(self)
-			portals.entry.exterior = self.exterior
-			portals.entry.interior = self
-			portals.entry.black = v.entry.black
-			portals.entry:Spawn()
-			portals.entry:Activate()
-			
-			portals.exit:SetWidth(v.exit.width)
-			portals.exit:SetHeight(v.exit.height)
-			portals.exit:SetPos(self:LocalToWorld(v.exit.pos))
-			portals.exit:SetAngles(self:LocalToWorldAngles(v.exit.ang))
-			portals.exit:SetExit(portals.entry)
-			portals.exit:SetParent(self)
-			portals.exit.interior = self
-			portals.exit.exterior = self.exterior
-			portals.exit.black = v.exit.black
-			portals.exit:Spawn()
-			portals.exit:Activate()
+		if self.CustomPortals then
+			self.customportals={}
+			for k,v in pairs(self.CustomPortals) do
+				self.customportals[k] = {}
+				local portals = self.customportals[k]
+				portals.entry=ents.Create("linked_portal_door")
+				portals.exit=ents.Create("linked_portal_door")
+				
+				portals.entry:SetWidth(v.entry.width)
+				portals.entry:SetHeight(v.entry.height)
+				portals.entry:SetPos(self:LocalToWorld(v.entry.pos))
+				portals.entry:SetAngles(self:LocalToWorldAngles(v.entry.ang))
+				portals.entry:SetExit(portals.exit)
+				portals.entry:SetParent(self)
+				portals.entry.exterior = self.exterior
+				portals.entry.interior = self
+				portals.entry.black = v.entry.black
+				portals.entry.fallback = v.entry.fallback
+				portals.entry:Spawn()
+				portals.entry:Activate()
+				
+				portals.exit:SetWidth(v.exit.width)
+				portals.exit:SetHeight(v.exit.height)
+				portals.exit:SetPos(self:LocalToWorld(v.exit.pos))
+				portals.exit:SetAngles(self:LocalToWorldAngles(v.exit.ang))
+				portals.exit:SetExit(portals.entry)
+				portals.exit:SetParent(self)
+				portals.exit.interior = self
+				portals.exit.exterior = self.exterior
+				portals.exit.black = v.exit.black
+				portals.exit.fallback = v.exit.fallback
+				portals.exit:Spawn()
+				portals.exit:Activate()
+			end
+		end
+	end)
+	
+	hook.Add("wp-teleport","doors-portals",function(portal,ent)
+		local p = portal:GetParent()
+		print(p.DoorInterior and portal.fallback or "n/a")
+		if p.DoorInterior and portal~=p.portals.interior and portal.fallback and p:IsStuck(ent) then
+			print("Player stuck, moving to fallback")
+			ent:SetPos(p:LocalToWorld(portal.fallback))
 		end
 	end)
 else
@@ -99,22 +117,24 @@ else
 			self.portals.interior.interior=self
 		end
 		
-		self.customportals={}
-		local count=net.ReadInt(8)
-		for i=1,count do
-			local k=net.ReadString()
-			self.customportals[k]={}
-			local portals = self.customportals[k]
+		if net.ReadBool() then
+			self.customportals={}
+			local count=net.ReadInt(8)
+			for i=1,count do
+				local k=net.ReadString()
+				self.customportals[k]={}
+				local portals = self.customportals[k]
 			
-			portals.entry=net.ReadEntity()
-			portals.entry.exterior = self.exterior
-			portals.entry.interior = self
-			portals.entry.black = net.ReadBool()
+				portals.entry=net.ReadEntity()
+				portals.entry.exterior = self.exterior
+				portals.entry.interior = self
+				portals.entry.black = net.ReadBool()
 			
-			portals.exit=net.ReadEntity()
-			portals.exit.exterior = self.exterior
-			portals.exit.interior = self
-			portals.exit.black = net.ReadBool()
+				portals.exit=net.ReadEntity()
+				portals.exit.exterior = self.exterior
+				portals.exit.interior = self
+				portals.exit.black = net.ReadBool()
+			end
 		end
 	end)
 	
