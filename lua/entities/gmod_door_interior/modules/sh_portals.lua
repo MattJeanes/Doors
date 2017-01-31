@@ -92,9 +92,7 @@ if SERVER then
 	
 	hook.Add("wp-teleport","doors-portals",function(portal,ent)
 		local p = portal:GetParent()
-		print(p.DoorInterior and portal.fallback or "n/a")
 		if p.DoorInterior and portal~=p.portals.interior and portal.fallback and p:IsStuck(ent) then
-			print("Player stuck, moving to fallback")
 			ent:SetPos(p:LocalToWorld(portal.fallback))
 		end
 	end)
