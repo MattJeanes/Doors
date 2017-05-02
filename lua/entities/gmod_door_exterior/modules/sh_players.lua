@@ -8,7 +8,8 @@ if SERVER then
 		if self.occupants[ply] then
 			return
 		end
-		if self:CallHook("CanPlayerEnter",ply)==false then
+		local allowed,allowforced = self:CallHook("CanPlayerEnter",ply)
+		if allowed==false and not allowforced then
 			return
 		end
 		if IsValid(ply.door) and ply.door~=self then
@@ -27,8 +28,8 @@ if SERVER then
 			if (not notp) and portals and self.interior.Fallback then
 				local pos=self:WorldToLocal(ply:GetPos())
 				ply:SetPos(self.interior:LocalToWorld(self.interior.Fallback.pos))
-				local ang=wp.TransformPortalAngle(ply:EyeAngles(),portals[1],portals[2])
-				local fwd=wp.TransformPortalAngle(ply:GetVelocity():Angle(),portals[1],portals[2]):Forward()
+				local ang=wp.TransformPortalAngle(ply:EyeAngles(),portals.exterior,portals.interior)
+				local fwd=wp.TransformPortalAngle(ply:GetVelocity():Angle(),portals.exterior,portals.interior):Forward()
 				ply:SetEyeAngles(Angle(ang.p,ang.y,0))
 				ply:SetLocalVelocity(fwd*ply:GetVelocity():Length())
 			end
@@ -99,8 +100,8 @@ if SERVER then
 			if IsValid(self.interior) then
 				local portals=self.interior.portals
 				if (not forced) and portals then
-					local ang=wp.TransformPortalAngle(ply:EyeAngles(),portals[2],portals[1])
-					local fwd=wp.TransformPortalAngle(ply:GetVelocity():Angle(),portals[2],portals[1]):Forward()
+					local ang=wp.TransformPortalAngle(ply:EyeAngles(),portals.interior,portals.exterior)
+					local fwd=wp.TransformPortalAngle(ply:GetVelocity():Angle(),portals.interior,portals.exterior):Forward()
 					ply:SetEyeAngles(Angle(ang.p,ang.y,0))
 					ply:SetLocalVelocity(fwd*ply:GetVelocity():Length())
 				end
