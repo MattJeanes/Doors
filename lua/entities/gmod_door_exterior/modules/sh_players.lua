@@ -107,6 +107,10 @@ if SERVER then
 				end
 			end
 		end
+		self:CallHook("PostPlayerExit", ply, forced, notp)
+		if IsValid(self.interior) then
+			self.interior:CallHook("PostPlayerExit", ply, forced, notp)
+		end
 	end
 	
 	hook.Add("wp-shouldtp", "doors-players", function(self,ent)
