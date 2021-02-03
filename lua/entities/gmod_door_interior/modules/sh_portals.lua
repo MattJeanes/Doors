@@ -37,6 +37,9 @@ if SERVER then
 		self.portals.exterior:SetAngles(self.exterior:LocalToWorldAngles(ext.ang))
 		self.portals.exterior:SetExit(self.portals.interior)
 		self.portals.exterior:SetParent(self.exterior)
+		if ext.link then
+			self.portals.exterior:SetCustomLink(ext.link)
+		end
 		self.portals.exterior.exterior = self.exterior
 		self.portals.exterior.interior = self
 		self.portals.exterior:Spawn()
@@ -48,6 +51,9 @@ if SERVER then
 		self.portals.interior:SetAngles(self:LocalToWorldAngles(int.ang))
 		self.portals.interior:SetExit(self.portals.exterior)
 		self.portals.interior:SetParent(self)
+		if int.link then
+			self.portals.interior:SetCustomLink(int.link)
+		end
 		self.portals.interior.interior = self
 		self.portals.interior.exterior = self.exterior
 		self.portals.interior:Spawn()
@@ -67,6 +73,9 @@ if SERVER then
 				portals.entry:SetAngles(self:LocalToWorldAngles(v.entry.ang))
 				portals.entry:SetExit(portals.exit)
 				portals.entry:SetParent(self)
+				if v.entry.link then
+					portals.entry:SetCustomLink(v.entry.link)
+				end
 				portals.entry.exterior = self.exterior
 				portals.entry.interior = self
 				portals.entry.black = v.entry.black
@@ -80,6 +89,9 @@ if SERVER then
 				portals.exit:SetAngles(self:LocalToWorldAngles(v.exit.ang))
 				portals.exit:SetExit(portals.entry)
 				portals.exit:SetParent(self)
+				if v.exit.link then
+					portals.exit:SetCustomLink(v.exit.link)
+				end
 				portals.exit.interior = self
 				portals.exit.exterior = self.exterior
 				portals.exit.black = v.exit.black
@@ -89,11 +101,24 @@ if SERVER then
 			end
 		end
 	end)
+
+	ENT:AddHook("PostTeleportPortal", "portals", function(self,portal,ent)
+		if portal~=self.portals.interior and portal.fallback and ent:IsPlayer() and self:IsStuck(ent) then
+			ent:SetPos(self:LocalToWorld(portal.fallback))
+		end
+	end)
+
+	hook.Add("wp-shouldtp","doors-portals",function(portal,ent)
+		local p = portal:GetParent()
+		if IsValid(p) and (p.DoorInterior or p.DoorExterior) and p._init then
+			return p:CallHook("ShouldTeleportPortal",portal,ent)
+		end
+	end)
 	
 	hook.Add("wp-teleport","doors-portals",function(portal,ent)
-		local p = portal:GetParent()
-		if p.DoorInterior and portal~=p.portals.interior and portal.fallback and p:IsStuck(ent) then
-			ent:SetPos(p:LocalToWorld(portal.fallback))
+		local p=portal:GetParent()
+		if IsValid(p) and (p.DoorInterior or p.DoorExterior) and p._init then
+			return p:CallHook("PostTeleportPortal",portal,ent)
 		end
 	end)
 else
@@ -142,25 +167,62 @@ else
 			return false
 		end
 	end)
+
+	ENT:AddHook("ShouldRenderPortal", "portals", function(self)
+		if LocalPlayer().doori~=self then
+			return false
+		end
+	end)
 	
 	hook.Add("wp-shouldrender", "doors-portals", function(portal,exit,origin)
 		local p=portal:GetParent()
-		if IsValid(p) and p.DoorInterior and ((p._init and LocalPlayer().doori~=p) or (not p._init)) then
-			return false
+		if IsValid(p) then
+			if p.DoorExterior or p.DoorInterior then
+				if not p._init then return false end
+				return p:CallHook("ShouldRenderPortal",portal,exit,origin)
+			end
 		end
 	end)
 	
 	hook.Add("wp-predraw","doors-portals",function(portal)
 		local p=portal:GetParent()
-		if IsValid(p) and (p.TardisExterior or p.TardisInterior) and p._init then
-			p:CallHook("PreDrawPortal")
+		if IsValid(p) and (p.DoorExterior or p.DoorInterior) and p._init then
+			p:CallHook("PreDrawPortal",portal)
 		end
 	end)
 	
 	hook.Add("wp-postdraw","doors-portals",function(portal)
 		local p=portal:GetParent()
-		if IsValid(p) and (p.TardisExterior or p.TardisInterior) and p._init then
-			p:CallHook("PostDrawPortal")
+		if IsValid(p) and (p.DoorExterior or p.DoorInterior) and p._init then
+			p:CallHook("PostDrawPortal",portal)
+		end
+	end)
+
+	hook.Add("wp-prerender","doors-portals",function(portal)
+		local p=portal:GetParent()
+		if IsValid(p) and (p.DoorExterior or p.DoorInterior) and p._init then
+			p:CallHook("PreRenderPortal",portal)
+		end
+	end)
+	
+	hook.Add("wp-postrender","doors-portals",function(portal)
+		local p=portal:GetParent()
+		if IsValid(p) and (p.DoorExterior or p.DoorInterior) and p._init then
+			p:CallHook("PostRenderPortal",portal)
 		end
 	end)
 end
+
+hook.Add("wp-trace", "doors-portals", function(portal)
+	local p=portal:GetParent()
+	if IsValid(p) and (p.DoorExterior or p.DoorInterior) and p._init then
+		return p:CallHook("ShouldTracePortal",portal)
+	end
+end)
+
+hook.Add("wp-tracefilter", "doors-portals", function(portal)
+	local p=portal:GetParent()
+	if IsValid(p) and (p.DoorExterior or p.DoorInterior) and p._init then
+		return p:CallHook("TraceFilterPortal",portal)
+	end
+end)

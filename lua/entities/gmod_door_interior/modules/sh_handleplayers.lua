@@ -52,6 +52,12 @@ if SERVER then
 			self:CheckPlayer(v)
 		end
 	end)
+
+	ENT:AddHook("ShouldTeleportPortal", "handleplayers", function(self,portal,ent)
+		if IsValid(ent) and ent:IsPlayer() and self.exterior:CallHook("CanPlayerExit",ent)==false then
+			return false
+		end
+	end)
 	
 	hook.Add("wp-teleport","doors-handleplayers",function(portal,ent)
 		if ent:IsPlayer() then
@@ -61,12 +67,12 @@ if SERVER then
 		end
 	end)
 else
-	ENT:AddHook("ShouldDraw", "players", function(self)
+	ENT:AddHook("ShouldDraw", "handleplayers", function(self)
 		if (LocalPlayer().doori~=self) and not wp.drawing and not self.contains[LocalPlayer().door] then
 			return false
 		end
 	end)
-	ENT:AddHook("ShouldThink", "players", function(self)
+	ENT:AddHook("ShouldThink", "handleplayers", function(self)
 		if LocalPlayer().doori~=self then
 			return false
 		end

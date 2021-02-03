@@ -1,25 +1,21 @@
 -- Cordon
 
-hook.Add("wp-prerender", "tardisi-cordon", function(portal,exit,origin)
-	local parent=exit:GetParent()
-	if parent.DoorInterior and parent._init then
-		for k,v in pairs(parent.props) do
-			if IsValid(k) then
-				k.olddraw=k:GetNoDraw()
-				k:SetNoDraw(false)
-			end
+ENT:AddHook("PreRenderPortal", "cordon", function(self,portal)
+	if portal ~= self.portals.interior then return end
+	for k,v in pairs(self.props) do
+		if IsValid(k) then
+			k.olddraw=k:GetNoDraw()
+			k:SetNoDraw(true)
 		end
 	end
 end)
 
-hook.Add("wp-postrender", "tardisi-cordon", function(portal,exit,origin)
-	local parent=exit:GetParent()
-	if parent.DoorInterior and parent._init then
-		for k,v in pairs(parent.props) do
-			if IsValid(k) then
-				k:SetNoDraw(k.olddraw)
-				k.olddraw=nil
-			end
+ENT:AddHook("PostRenderPortal", "cordon", function(self,portal)
+	if portal ~= self.portals.interior then return end
+	for k,v in pairs(self.props) do
+		if IsValid(k) and k.olddraw~=nil then
+			k:SetNoDraw(k.olddraw)
+			k.olddraw=nil
 		end
 	end
 end)
@@ -42,7 +38,6 @@ ENT:AddHook("Cordon", "cordon", function(self,class,ent)
 end)
 
 function ENT:UpdateCordon()
-	local inside=LocalPlayer().doori==self or self.contains[LocalPlayer().door]
 	for k,v in pairs(ents.FindInBox(self:LocalToWorld(self.mins),self:LocalToWorld(self.maxs))) do
 		local check=true
 		local class=v:GetClass()
@@ -57,15 +52,12 @@ function ENT:UpdateCordon()
 			end
 		end
 		if check then
-			--if not self.props[v] then
-				--print("enter",v)
-			--end
+			-- if not self.props[v] then
+			-- 	print("enter",v)
+			-- end
 			self.props[v]=1
 			if v.doors_cordon==nil then
 				v.doors_cordon=v:GetNoDraw()
-			end
-			if v:GetNoDraw()==inside then
-				v:SetNoDraw(not inside)
 			end
 		end
 	end
@@ -75,7 +67,7 @@ function ENT:UpdateCordon()
 				k:SetNoDraw(k.doors_cordon)
 				k.doors_cordon=nil
 				self.props[k]=nil
-				--print("exit",k)
+				-- print("exit",k)
 			elseif v==1 then
 				self.props[k]=true
 			end
@@ -102,6 +94,13 @@ ENT:AddHook("Think", "cordon", function(self)
 	if CurTime()>self.propscan then
 		self.propscan=CurTime()+1
 		self:UpdateCordon()
+	end
+	local inside=LocalPlayer().doori==self or self.contains[LocalPlayer().door] or false
+	for k,v in pairs(self.props) do
+		if IsValid(k) and k:GetNoDraw()==inside then
+			-- Need to do this every frame unfortunately as GMod resets it really fast
+			k:SetNoDraw(not inside)
+		end
 	end
 end)
 

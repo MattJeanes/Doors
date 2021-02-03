@@ -112,13 +112,10 @@ if SERVER then
 			self.interior:CallHook("PostPlayerExit", ply, forced, notp)
 		end
 	end
-	
-	hook.Add("wp-shouldtp", "doors-players", function(self,ent)
-		local e=self:GetParent()
-		if IsValid(e) and IsValid(ent) and ent:IsPlayer() and (e.DoorExterior or e.DoorInterior) then
-			if (e.DoorExterior and e or e.exterior):CallHook(e.DoorExterior and "CanPlayerEnter" or "CanPlayerExit",ent)==false then
-				return false
-			end
+
+	ENT:AddHook("ShouldTeleportPortal", "players", function(self,portal,ent)
+		if IsValid(ent) and ent:IsPlayer() and self:CallHook("CanPlayerEnter",ent)==false then
+			return false
 		end
 	end)
 else	
