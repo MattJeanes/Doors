@@ -64,6 +64,7 @@ function ENT:Initialize()
 	self.lastthink=CurTime()
 	
 	self:CallHook("Initialize")
+	self._init = true
 	self:CallHook("PostInitialize")
 end
 
