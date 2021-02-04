@@ -51,21 +51,20 @@ function ENT:UpdateCordon()
 				check=false
 			end
 		end
+		if self.props[v]==nil and v:GetNoDraw() then
+			check=false
+		end
 		if check then
 			-- if not self.props[v] then
 			-- 	print("enter",v)
 			-- end
 			self.props[v]=1
-			if v.doors_cordon==nil then
-				v.doors_cordon=v:GetNoDraw()
-			end
 		end
 	end
 	for k,v in pairs(self.props) do
 		if IsValid(k) then
 			if v==true then -- left
-				k:SetNoDraw(k.doors_cordon)
-				k.doors_cordon=nil
+				k:SetNoDraw(false)
 				self.props[k]=nil
 				-- print("exit",k)
 			elseif v==1 then
@@ -81,9 +80,8 @@ ENT:AddHook("OnRemove", "cordon", function(self)
 	if self.props then
 		for k,v in pairs(self.props) do
 			if IsValid(k) then
-				--print("onremove",k)
-				k:SetNoDraw(k.doors_cordon)
-				k.doors_cordon=nil
+				-- print("onremove",k)
+				k:SetNoDraw(false)
 				self.props[k]=nil
 			end
 		end
