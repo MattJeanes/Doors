@@ -30,7 +30,7 @@ function ENT:CallHook(name,...)
 	local a,b,c,d,e,f
 	for k,v in pairs(hooks[name]) do
 		a,b,c,d,e,f = v(self,...)
-		if ( a != nil ) then
+		if a ~= nil then
 			return a,b,c,d,e,f
 		end
 	end
