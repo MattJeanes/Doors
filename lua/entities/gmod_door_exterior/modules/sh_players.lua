@@ -58,10 +58,10 @@ if SERVER then
 				table.insert(weps, v:GetClass())
 				local p=v:GetPrimaryAmmoType()
 				local s=v:GetSecondaryAmmoType()
-				if p != -1 then
+				if p ~= -1 then
 					ammo[p]=ply:GetAmmoCount(p)
 				end
-				if s != -1 then
+				if s ~= -1 then
 					ammo[s]=ply:GetAmmoCount(s)
 				end
 			end
