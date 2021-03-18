@@ -54,7 +54,7 @@ if SERVER then
 	end)
 
 	ENT:AddHook("ShouldTeleportPortal", "handleplayers", function(self,portal,ent)
-		if IsValid(ent) and ent:IsPlayer() and self.exterior:CallHook("CanPlayerExit",ent)==false then
+		if IsValid(ent) and ent:IsPlayer() and portal==self.portals.interior and self.exterior:CallHook("CanPlayerExit",ent)==false then
 			return false
 		end
 	end)
