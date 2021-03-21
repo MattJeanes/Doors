@@ -6,12 +6,12 @@ function ENT:SpawnFunction(ply, tr, ClassName, customData)
 	if not tr.Hit then return end
 	local SpawnPos = tr.HitPos + tr.HitNormal
 	local ent = ents.Create( ClassName )
-	if customData then
-		ent:CallHook("CustomData", customData)
-	end
 	ent:SetPos(SpawnPos)
 	local ang=Angle(0, (ply:GetPos()-SpawnPos):Angle().y, 0)
 	ent:SetAngles(ang)
+	if customData then
+		ent:CallHook("CustomData", customData)
+	end
 	Doors:SetupOwner(ent,ply)
 	ent:Spawn()
 	ent:Activate()
