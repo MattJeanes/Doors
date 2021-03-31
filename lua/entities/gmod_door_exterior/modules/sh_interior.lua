@@ -1,5 +1,7 @@
 -- Adds an interior
 
+
+
 if SERVER then
 	function ENT:FindPosition(e)
 		local creator=e:GetCreator()
@@ -58,6 +60,10 @@ if SERVER then
 					return
 				end
 				creator:ChatPrint("Done!")
+				local newPos = self.interior:CallHook("SetupPosition", res)
+				if newPos ~= nil and isvector(newPos) then
+					res = newPos
+				end
 				self.interior:SetPos(res)
 				self:DeleteOnRemove(self.interior)
 				self.interior:DeleteOnRemove(self)
