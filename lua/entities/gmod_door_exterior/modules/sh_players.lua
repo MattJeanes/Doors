@@ -27,7 +27,13 @@ if SERVER then
 			local portals=self.interior.portals
 			if (not notp) and portals and self.interior.Fallback then
 				local pos=self:WorldToLocal(ply:GetPos())
-				ply:SetPos(self.interior:LocalToWorld(self.interior.Fallback.pos))
+				local newpos = self.interior:LocalToWorld(self.interior.Fallback.pos)
+				local plyHeight = ply:OBBMaxs().z
+				local fallbackPos = Vector(0,0,plyHeight)
+				local temppos = Vector(fallbackPos)
+				temppos:Rotate(self.interior:GetAngles())
+				newpos = newpos + Vector(0,0,((temppos.z - plyHeight) / 2)) 
+				ply:SetPos(newpos)
 				local ang=wp.TransformPortalAngle(ply:EyeAngles(),portals.exterior,portals.interior)
 				local fwd=wp.TransformPortalAngle(ply:GetVelocity():Angle(),portals.exterior,portals.interior):Forward()
 				ply:SetEyeAngles(Angle(ang.p,ang.y,0))
@@ -96,7 +102,13 @@ if SERVER then
 		ply.door = nil
 		ply.doori = nil
 		if not notp and self.Fallback then
-			ply:SetPos(self:LocalToWorld(self.Fallback.pos))
+			local newpos = self:LocalToWorld(self.Fallback.pos)
+			local plyHeight = ply:OBBMaxs().z
+			local fallbackPos = Vector(0,0,plyHeight)
+			local temppos = Vector(fallbackPos)
+			temppos:Rotate(self:GetAngles())
+			newpos = newpos + Vector(0,0,((temppos.z - plyHeight) / 2)) 
+			ply:SetPos(newpos)
 			if IsValid(self.interior) then
 				local portals=self.interior.portals
 				if (not forced) and portals then
