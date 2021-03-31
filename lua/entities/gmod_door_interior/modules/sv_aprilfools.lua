@@ -12,6 +12,8 @@ ENT:AddHook("PlayerEnter", "aprilfools", function(self,ply)
     if (not Doors:IsAprilFools()) or ply.doors_aprilfools then return end
     ply.doors_aprilfools = true
     timer.Simple(10, function()
-        ply:ChatPrint("April fools! :) (doors_aprilfools_2021 0 in console to disable)")
+        if IsValid(ply) then
+            ply:ChatPrint("April fools! :) (doors_aprilfools_2021 0 in console to disable)")
+        end
     end)
 end)
