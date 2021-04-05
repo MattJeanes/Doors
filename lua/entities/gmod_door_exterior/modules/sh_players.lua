@@ -30,8 +30,8 @@ if SERVER then
 				local newpos = self.interior:LocalToWorld(self.interior.Fallback.pos)
 				local height = ply:OBBMaxs().z
 				local temppos = Vector(0,0,height)
-				temppos:Rotate(self.interior:GetAngles())
-				newpos = newpos + Vector(0,0,(temppos.z - height) / 2) 
+				temppos:Rotate(Angle(0,0,self.interior:GetAngles().r))
+				newpos = newpos + Vector(0,0,(temppos.z - height) / 2)
 				ply:SetPos(newpos)
 				local ang=wp.TransformPortalAngle(ply:EyeAngles(),portals.exterior,portals.interior)
 				local fwd=wp.TransformPortalAngle(ply:GetVelocity():Angle(),portals.exterior,portals.interior):Forward()
@@ -104,8 +104,8 @@ if SERVER then
 			local newpos = self:LocalToWorld(self.Fallback.pos)
 			local height = ply:OBBMaxs().z
 			local temppos = Vector(0,0,height)
-			temppos:Rotate(self:GetAngles())
-			newpos = newpos + Vector(0,0,(temppos.z - height) / 2) 
+			temppos:Rotate(Angle(0,0,self:GetAngles().r))
+			newpos = newpos + Vector(0,0,(temppos.z - height) / 2)
 			ply:SetPos(newpos)
 			if IsValid(self.interior) then
 				local portals=self.interior.portals
