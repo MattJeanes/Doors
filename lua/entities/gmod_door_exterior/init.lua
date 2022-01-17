@@ -4,9 +4,9 @@ include('shared.lua')
 
 function ENT:SpawnFunction(ply, tr, ClassName, customData)
 	local SpawnPos
-	if tr.Hit then
+	if tr and tr.Hit then
 		SpawnPos = tr.HitPos + tr.HitNormal
-	elseif customData
+	elseif customData then
 		SpawnPos = customData.pos
 	end
 	if SpawnPos == nil then return end
