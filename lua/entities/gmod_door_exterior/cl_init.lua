@@ -33,8 +33,10 @@ net.Receive("Doors-Initialize", function(len)
 		ext:CallHook("PlayerInitialize")
 		if ext._init then
 			ext:CallHook("Initialize")
+			ext:CallHook("PostInitialize")
 			if IsValid(int) then
 				int:CallHook("Initialize")
+				int:CallHook("PostInitialize")
 			end
 		end
 	end

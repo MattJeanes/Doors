@@ -3,8 +3,14 @@ AddCSLuaFile('shared.lua')
 include('shared.lua')
 
 function ENT:SpawnFunction(ply, tr, ClassName, customData)
-	if not tr.Hit then return end
-	local SpawnPos = tr.HitPos + tr.HitNormal
+	local SpawnPos
+	if tr and tr.Hit then
+		SpawnPos = tr.HitPos + tr.HitNormal
+	elseif customData then
+		SpawnPos = customData.pos
+	end
+	if SpawnPos == nil then return end
+
 	local ent = ents.Create( ClassName )
 	ent:SetPos(SpawnPos)
 	local ang=Angle(0, (ply:GetPos()-SpawnPos):Angle().y, 0)
