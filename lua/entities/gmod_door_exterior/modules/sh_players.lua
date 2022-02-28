@@ -33,10 +33,20 @@ if SERVER then
                 temppos:Rotate(Angle(0,0,self.interior:GetAngles().r))
                 newpos = newpos + Vector(0,0,(temppos.z - height) / 2)
                 ply:SetPos(newpos)
-                local ang=wp.TransformPortalAngle(ply:EyeAngles(),portals.exterior,portals.interior)
-                local fwd=wp.TransformPortalAngle(ply:GetVelocity():Angle(),portals.exterior,portals.interior):Forward()
+
+                local portal_pos, portal_ang = LocalToWorld(self.Portal.pos, self.Portal.ang, self:GetPos(), self:GetAngles())
+                local intportal_pos, intportal_ang = LocalToWorld(self.interior.Portal.pos, self.interior.Portal.ang, self.interior:GetPos(), self.interior:GetAngles())
+
+                local l_pos, l_ang = WorldToLocal(ply:GetPos(), ply:EyeAngles(), portal_pos, portal_ang)
+                l_ang:RotateAroundAxis( Vector(0, 0, 1), 180)
+                local _, ang = LocalToWorld(l_pos, l_ang, intportal_pos, intportal_ang)
+
+                local l_pos, l_velang = WorldToLocal(ply:GetPos(), ply:GetVelocity():Angle(), portal_pos, portal_ang)
+                l_velang:RotateAroundAxis( Vector(0, 0, 1), 180)
+                local _, velang = LocalToWorld(l_pos, l_velang, intportal_pos, intportal_ang)
+
                 ply:SetEyeAngles(Angle(ang.p,ang.y,0))
-                ply:SetLocalVelocity(fwd*ply:GetVelocity():Length())
+                ply:SetLocalVelocity(velang:Forward()*ply:GetVelocity():Length())
             end
         end
         self:CallHook("PlayerEnter", ply, notp)
@@ -110,10 +120,19 @@ if SERVER then
             if IsValid(self.interior) then
                 local portals=self.interior.portals
                 if (not forced) and portals then
-                    local ang=wp.TransformPortalAngle(ply:EyeAngles(),portals.interior,portals.exterior)
-                    local fwd=wp.TransformPortalAngle(ply:GetVelocity():Angle(),portals.interior,portals.exterior):Forward()
+                    local portal_pos, portal_ang = LocalToWorld(self.Portal.pos, self.Portal.ang, self:GetPos(), self:GetAngles())
+                    local intportal_pos, intportal_ang = LocalToWorld(self.interior.Portal.pos, self.interior.Portal.ang, self.interior:GetPos(), self.interior:GetAngles())
+
+                    local l_pos, l_ang = WorldToLocal(ply:GetPos(), ply:EyeAngles(), intportal_pos, intportal_ang)
+                    l_ang:RotateAroundAxis( Vector(0, 0, 1), 180)
+                    local _, ang = LocalToWorld(l_pos, l_ang, portal_pos, portal_ang)
+
+                    local l_pos, l_velang = WorldToLocal(ply:GetPos(), ply:GetVelocity():Angle(), intportal_pos, intportal_ang)
+                    l_velang:RotateAroundAxis( Vector(0, 0, 1), 180)
+                    local _, velang = LocalToWorld(l_pos, l_velang, portal_pos, portal_ang)
+
                     ply:SetEyeAngles(Angle(ang.p,ang.y,0))
-                    ply:SetLocalVelocity(fwd*ply:GetVelocity():Length())
+                    ply:SetLocalVelocity(velang:Forward()*ply:GetVelocity():Length())
                 end
             end
         end

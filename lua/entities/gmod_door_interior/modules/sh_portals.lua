@@ -22,82 +22,111 @@ if SERVER then
             end
         end
     end)
+
+    local function SetupWorldPortals(self, entryEnt, entry, exitEnt, exit)
+        local entryPortal=ents.Create("linked_portal_door")
+        local exitPortal=ents.Create("linked_portal_door")
+        
+        entryPortal:SetWidth(entry.width)
+        entryPortal:SetHeight(entry.height)
+        entryPortal:SetPos(entryEnt:LocalToWorld(entry.pos))
+        entryPortal:SetAngles(entryEnt:LocalToWorldAngles(entry.ang))
+        entryPortal:SetExit(exitPortal)
+        entryPortal:SetParent(entryEnt)
+        if entry.link then
+            entryPortal:SetCustomLink(entry.link)
+        end
+        entryPortal.exterior = entryEnt
+        entryPortal.interior = exitEnt
+        entryPortal.black = entry.black
+        entryPortal.fallback = entry.fallback
+        entryPortal:Spawn()
+        entryPortal:Activate()
+        
+        exitPortal:SetWidth(exit.width)
+        exitPortal:SetHeight(exit.height)
+        exitPortal:SetPos(exitEnt:LocalToWorld(exit.pos))
+        exitPortal:SetAngles(exitEnt:LocalToWorldAngles(exit.ang))
+        exitPortal:SetExit(entryPortal)
+        exitPortal:SetParent(exitEnt)
+        if exit.link then
+            exitPortal:SetCustomLink(exit.link)
+        end
+        exitPortal.interior = exitEnt
+        exitPortal.exterior = entryEnt
+        exitPortal.black = exit.black
+        exitPortal.fallback = exit.fallback
+        exitPortal:Spawn()
+        exitPortal:Activate()
+
+        return entryPortal, exitPortal
+    end
+
+
+    local function SetupSeamlessPortals(self, entryEnt, entry, exitEnt, exit)
+        local entryPortal=ents.Create("seamless_portal")
+        local exitPortal=ents.Create("seamless_portal")
+        
+        -- entryPortal:SetWidth(entry.width)
+        -- entryPortal:SetHeight(entry.height)
+        entryPortal:SetPos(entryEnt:LocalToWorld(entry.pos))
+        entryPortal:SetAngles(entryEnt:LocalToWorldAngles(entry.ang))
+        entryPortal:SetParent(entryEnt)
+        -- if entry.link then
+        --     entryPortal:SetCustomLink(entry.link)
+        -- end
+        entryPortal.exterior = entryEnt
+        entryPortal.interior = exitEnt
+        -- entryPortal.black = entry.black
+        -- entryPortal.fallback = entry.fallback
+        entryPortal:Spawn()
+        entryPortal:Activate()
+        
+        -- exitPortal:SetWidth(exit.width)
+        -- exitPortal:SetHeight(exit.height)
+        exitPortal:SetPos(exitEnt:LocalToWorld(exit.pos))
+        exitPortal:SetAngles(exitEnt:LocalToWorldAngles(exit.ang))
+        exitPortal:SetParent(exitEnt)
+        -- if exit.link then
+            -- exitPortal:SetCustomLink(exit.link)
+        -- end
+        exitPortal.interior = exitEnt
+        exitPortal.exterior = entryEnt
+        -- exitPortal.black = exit.black
+        -- exitPortal.fallback = exit.fallback
+        exitPortal:Spawn()
+        exitPortal:Activate()
+
+        entryPortal:LinkPortal(exitPortal)
+
+        return entryPortal, exitPortal
+    end
+
+    function ENT:SetupPortals(entryEnt, entry, exitEnt, exit)
+        -- todo: detect seamless portal addon + warn user / fallback to world portals if not there(?)
+        if entry.seamless and entry.seamless then
+            return SetupSeamlessPortals(self, entryEnt, entry, exitEnt, exit)
+        elseif entry.seamless or exit.seamless then
+            error("SeamlessPortals must be set to true on both entry and exit portals")
+        else
+            return SetupWorldPortals(self, entryEnt, entry, exitEnt, exit)
+        end
+    end
     
     ENT:AddHook("PreInitialize", "portals", function(self)
         local int=self.Portal
         local ext=self.exterior.Portal
         if not (int and ext) then return end
         self.portals={}
-        self.portals.exterior=ents.Create("linked_portal_door")
-        self.portals.interior=ents.Create("linked_portal_door")
         
-        self.portals.exterior:SetWidth(ext.width)
-        self.portals.exterior:SetHeight(ext.height)
-        self.portals.exterior:SetPos(self.exterior:LocalToWorld(ext.pos))
-        self.portals.exterior:SetAngles(self.exterior:LocalToWorldAngles(ext.ang))
-        self.portals.exterior:SetExit(self.portals.interior)
-        self.portals.exterior:SetParent(self.exterior)
-        if ext.link then
-            self.portals.exterior:SetCustomLink(ext.link)
-        end
-        self.portals.exterior.exterior = self.exterior
-        self.portals.exterior.interior = self
-        self.portals.exterior:Spawn()
-        self.portals.exterior:Activate()
-        
-        self.portals.interior:SetWidth(int.width)
-        self.portals.interior:SetHeight(int.height)
-        self.portals.interior:SetPos(self:LocalToWorld(int.pos))
-        self.portals.interior:SetAngles(self:LocalToWorldAngles(int.ang))
-        self.portals.interior:SetExit(self.portals.exterior)
-        self.portals.interior:SetParent(self)
-        if int.link then
-            self.portals.interior:SetCustomLink(int.link)
-        end
-        self.portals.interior.interior = self
-        self.portals.interior.exterior = self.exterior
-        self.portals.interior:Spawn()
-        self.portals.interior:Activate()
+        self.portals.exterior, self.portals.interior = self:SetupPortals(self.exterior, ext, self, int)
         
         if self.CustomPortals then
             self.customportals={}
             for k,v in pairs(self.CustomPortals) do
                 self.customportals[k] = {}
                 local portals = self.customportals[k]
-                portals.entry=ents.Create("linked_portal_door")
-                portals.exit=ents.Create("linked_portal_door")
-                
-                portals.entry:SetWidth(v.entry.width)
-                portals.entry:SetHeight(v.entry.height)
-                portals.entry:SetPos(self:LocalToWorld(v.entry.pos))
-                portals.entry:SetAngles(self:LocalToWorldAngles(v.entry.ang))
-                portals.entry:SetExit(portals.exit)
-                portals.entry:SetParent(self)
-                if v.entry.link then
-                    portals.entry:SetCustomLink(v.entry.link)
-                end
-                portals.entry.exterior = self.exterior
-                portals.entry.interior = self
-                portals.entry.black = v.entry.black
-                portals.entry.fallback = v.entry.fallback
-                portals.entry:Spawn()
-                portals.entry:Activate()
-                
-                portals.exit:SetWidth(v.exit.width)
-                portals.exit:SetHeight(v.exit.height)
-                portals.exit:SetPos(self:LocalToWorld(v.exit.pos))
-                portals.exit:SetAngles(self:LocalToWorldAngles(v.exit.ang))
-                portals.exit:SetExit(portals.entry)
-                portals.exit:SetParent(self)
-                if v.exit.link then
-                    portals.exit:SetCustomLink(v.exit.link)
-                end
-                portals.exit.interior = self
-                portals.exit.exterior = self.exterior
-                portals.exit.black = v.exit.black
-                portals.exit.fallback = v.exit.fallback
-                portals.exit:Spawn()
-                portals.exit:Activate()
+                portals.entry, portals.exit = self:SetupPortals(self, v.entry, self, v.exit)
             end
         end
     end)
