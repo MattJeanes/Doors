@@ -72,13 +72,13 @@ if SERVER then
         entryPortal:SetPos(entryEnt:LocalToWorld(entry.pos))
         entryPortal:SetAngles(entryEnt:LocalToWorldAngles(entry.ang))
         entryPortal:SetParent(entryEnt)
-        -- if entry.link then
-        --     entryPortal:SetCustomLink(entry.link)
-        -- end
+        if entry.link then
+            entryPortal:SetCustomLink(entry.link)
+        end
         entryPortal.exterior = entryEnt
         entryPortal.interior = exitEnt
-        -- entryPortal.black = entry.black
-        -- entryPortal.fallback = entry.fallback
+        entryPortal.black = entry.black
+        entryPortal.fallback = entry.fallback
         entryPortal:Spawn()
         entryPortal:Activate()
         
@@ -87,13 +87,13 @@ if SERVER then
         exitPortal:SetPos(exitEnt:LocalToWorld(exit.pos))
         exitPortal:SetAngles(exitEnt:LocalToWorldAngles(exit.ang))
         exitPortal:SetParent(exitEnt)
-        -- if exit.link then
-            -- exitPortal:SetCustomLink(exit.link)
-        -- end
+        if exit.link then
+            exitPortal:SetCustomLink(exit.link)
+        end
         exitPortal.interior = exitEnt
         exitPortal.exterior = entryEnt
-        -- exitPortal.black = exit.black
-        -- exitPortal.fallback = exit.fallback
+        exitPortal.black = exit.black
+        exitPortal.fallback = exit.fallback
         exitPortal:Spawn()
         exitPortal:Activate()
 
