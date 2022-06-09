@@ -37,6 +37,16 @@ if SERVER then
         self.portals.exterior:SetAngles(self.exterior:LocalToWorldAngles(ext.ang))
         self.portals.exterior:SetExit(self.portals.interior)
         self.portals.exterior:SetParent(self.exterior)
+
+        if ext.exit_point then
+            self.portals.exterior:SetExitPosOffset(ext.exit_point.pos - ext.pos)
+            self.portals.exterior:SetExitAngOffset(ext.exit_point.ang - ext.ang)
+        end
+        if ext.exit_point_offset then
+            self.portals.exterior:SetExitPosOffset(ext.exit_point_offset.pos)
+            self.portals.exterior:SetExitAngOffset(ext.exit_point_offset.ang)
+        end
+
         if ext.link then
             self.portals.exterior:SetCustomLink(ext.link)
         end
@@ -51,6 +61,16 @@ if SERVER then
         self.portals.interior:SetAngles(self:LocalToWorldAngles(int.ang))
         self.portals.interior:SetExit(self.portals.exterior)
         self.portals.interior:SetParent(self)
+
+        if int.exit_point then
+            self.portals.interior:SetExitPosOffset(int.exit_point.pos - int.pos)
+            self.portals.interior:SetExitAngOffset(int.exit_point.ang - int.ang)
+        end
+        if int.exit_point_offset then
+            self.portals.interior:SetExitPosOffset(int.exit_point_offset.pos)
+            self.portals.interior:SetExitAngOffset(int.exit_point_offset.ang)
+        end
+
         if int.link then
             self.portals.interior:SetCustomLink(int.link)
         end
