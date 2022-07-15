@@ -290,6 +290,13 @@ else
             p:CallHook("PostRenderPortal",portal)
         end
     end)
+
+    hook.Add("wp-allowthickportal","doors-portals",function(portal)
+        local p=portal:GetParent()
+        if IsValid(p) and (p.DoorExterior or p.DoorInterior) and p._init then
+            return p:CallHook("ShouldAllowThickPortal",portal)
+        end
+    end)
 end
 
 hook.Add("wp-trace", "doors-portals", function(portal)
