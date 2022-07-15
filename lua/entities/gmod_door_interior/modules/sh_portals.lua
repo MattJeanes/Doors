@@ -55,6 +55,10 @@ if SERVER then
             self.portals.exterior:SetThickness(ext.thickness)
         end
 
+        if ext.inverted then
+            self.portals.exterior:SetInverted(ext.inverted)
+        end
+
         self.portals.exterior.exterior = self.exterior
         self.portals.exterior.interior = self
         self.portals.exterior:Spawn()
@@ -82,6 +86,10 @@ if SERVER then
         
         if int.thickness then
             self.portals.interior:SetThickness(int.thickness)
+        end
+
+        if int.inverted then
+            self.portals.interior:SetInverted(int.inverted)
         end
 
         self.portals.interior.interior = self
@@ -121,6 +129,10 @@ if SERVER then
                     portals.entry:SetThickness(v.entry.thickness)
                 end
 
+                if v.entry.inverted then
+                    portals.entry:SetInverted(v.entry.inverted)
+                end
+
                 portals.entry.exterior = self.exterior
                 portals.entry.interior = self
                 portals.entry.black = v.entry.black
@@ -150,6 +162,10 @@ if SERVER then
 
                 if v.exit.thickness then
                     portals.exit:SetThickness(v.exit.thickness)
+                end
+
+                if v.exit.inverted then
+                    portals.exit:SetInverted(v.exit.inverted)
                 end
 
                 portals.exit.interior = self
