@@ -31,12 +31,17 @@ if SERVER then
         self.portals.exterior=ents.Create("linked_portal_door")
         self.portals.interior=ents.Create("linked_portal_door")
         
+        -- Exterior Portal
         self.portals.exterior:SetWidth(ext.width)
         self.portals.exterior:SetHeight(ext.height)
         self.portals.exterior:SetPos(self.exterior:LocalToWorld(ext.pos))
         self.portals.exterior:SetAngles(self.exterior:LocalToWorldAngles(ext.ang))
         self.portals.exterior:SetExit(self.portals.interior)
         self.portals.exterior:SetParent(self.exterior)
+
+        if ext.link then
+            self.portals.exterior:SetCustomLink(ext.link)
+        end
 
         if ext.exit_point_offset then
             self.portals.exterior:SetExitPosOffset(ext.exit_point_offset.pos)
@@ -46,20 +51,26 @@ if SERVER then
             self.portals.exterior:SetExitAngOffset(ext.exit_point.ang - ext.ang)
         end
 
-        if ext.link then
-            self.portals.exterior:SetCustomLink(ext.link)
+        if ext.thickness then
+            self.portals.exterior:SetThickness(ext.thickness)
         end
+
         self.portals.exterior.exterior = self.exterior
         self.portals.exterior.interior = self
         self.portals.exterior:Spawn()
         self.portals.exterior:Activate()
         
+        -- interior Portal
         self.portals.interior:SetWidth(int.width)
         self.portals.interior:SetHeight(int.height)
         self.portals.interior:SetPos(self:LocalToWorld(int.pos))
         self.portals.interior:SetAngles(self:LocalToWorldAngles(int.ang))
         self.portals.interior:SetExit(self.portals.exterior)
         self.portals.interior:SetParent(self)
+
+        if int.link then
+            self.portals.interior:SetCustomLink(int.link)
+        end
 
         if int.exit_point_offset then
             self.portals.interior:SetExitPosOffset(int.exit_point_offset.pos)
@@ -68,10 +79,11 @@ if SERVER then
             self.portals.interior:SetExitPosOffset(int.exit_point.pos - int.pos)
             self.portals.interior:SetExitAngOffset(int.exit_point.ang - int.ang)
         end
-
-        if int.link then
-            self.portals.interior:SetCustomLink(int.link)
+        
+        if int.thickness then
+            self.portals.interior:SetThickness(int.thickness)
         end
+
         self.portals.interior.interior = self
         self.portals.interior.exterior = self.exterior
         self.portals.interior:Spawn()
@@ -85,6 +97,7 @@ if SERVER then
                 portals.entry=ents.Create("linked_portal_door")
                 portals.exit=ents.Create("linked_portal_door")
 
+                -- Entry Portal
                 portals.entry:SetWidth(v.entry.width)
                 portals.entry:SetHeight(v.entry.height)
                 portals.entry:SetPos(self:LocalToWorld(v.entry.pos))
@@ -95,12 +108,17 @@ if SERVER then
                 if v.entry.link then
                     portals.entry:SetCustomLink(v.entry.link)
                 end
+
                 if v.entry.exit_point_offset then
                     portals.entry:SetExitPosOffset(v.entry.exit_point_offset.pos)
                     portals.entry:SetExitAngOffset(v.entry.exit_point_offset.ang)
                 elseif v.entry.exit_point then
                     portals.entry:SetExitPosOffset(v.entry.exit_point.pos - v.entry.pos)
                     portals.entry:SetExitAngOffset(v.entry.exit_point.ang - v.entry.ang)
+                end
+
+                if v.entry.thickness then
+                    portals.entry:SetThickness(v.entry.thickness)
                 end
 
                 portals.entry.exterior = self.exterior
@@ -110,6 +128,7 @@ if SERVER then
                 portals.entry:Spawn()
                 portals.entry:Activate()
 
+                -- Exit Portal
                 portals.exit:SetWidth(v.exit.width)
                 portals.exit:SetHeight(v.exit.height)
                 portals.exit:SetPos(self:LocalToWorld(v.exit.pos))
@@ -120,12 +139,17 @@ if SERVER then
                 if v.exit.link then
                     portals.exit:SetCustomLink(v.exit.link)
                 end
+
                 if v.exit.exit_point_offset then
                     portals.exit:SetExitPosOffset(v.exit.exit_point_offset.pos)
                     portals.exit:SetExitAngOffset(v.exit.exit_point_offset.ang)
                 elseif v.exit.exit_point then
                     portals.exit:SetExitPosOffset(v.exit.exit_point.pos - v.exit.pos)
                     portals.exit:SetExitAngOffset(v.exit.exit_point.ang - v.exit.ang)
+                end
+
+                if v.exit.thickness then
+                    portals.exit:SetThickness(v.exit.thickness)
                 end
 
                 portals.exit.interior = self
