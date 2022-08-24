@@ -5,7 +5,9 @@
 if SERVER then
     function ENT:FindPosition(e)
         local creator=e:GetCreator()
-        creator:ChatPrint("Please wait, finding suitable spawn location for interior..")
+        if self:CallHook("FindingPosition", e, creator)~=true then
+            creator:ChatPrint("Please wait, finding suitable spawn location for interior..")
+        end
         coroutine.yield()
         local td={}
         td.mins=e.mins or e:OBBMins()
@@ -48,10 +50,12 @@ if SERVER then
                 self.findingpos=nil
                 local creator = self:GetCreator()
                 if not success or not res then
-                    if res then
-                        creator:ChatPrint("Coroutine error while finding position: "..res)
-                    else
-                        creator:ChatPrint("WARNING: Unable to locate space for interior, you can try again or use a different map.")
+                    if self:CallHook("FindingPositionFailed", self.interior, creator, res)~=true then
+                        if res then
+                            creator:ChatPrint("Coroutine error while finding position: "..res)
+                        else
+                            creator:ChatPrint("WARNING: Unable to locate space for interior, you can try again or use a different map.")
+                        end
                     end
                     self.interior:Remove()
                     self.interior=nil
@@ -59,7 +63,9 @@ if SERVER then
                     self:CallHook("InteriorReady",false)
                     return
                 end
-                creator:ChatPrint("Done!")
+                if self:CallHook("FoundPosition", self.interior, creator)~=true then
+                    creator:ChatPrint("Done!")
+                end
                 local newPos = self.interior:CallHook("SetupPosition", res)
                 if newPos ~= nil and isvector(newPos) then
                     res = newPos
@@ -70,6 +76,7 @@ if SERVER then
                 self.interior.occupants=self.occupants -- Hooray for referenced tables
                 self.interior=self.interior
                 self.interior.spacecheck=nil
+                self.interior:SetCollisionGroup(self.interior.oldcollisiongroup)
                 self.interior:Initialize()
                 self.intready=true
                 self:CallHook("InteriorReady",self.interior)
@@ -86,6 +93,8 @@ if SERVER then
         e:Spawn()
         e:Activate()
         e:CallHook("PreInitialize")
+        e.oldcollisiongroup = e:GetCollisionGroup()
+        e:SetCollisionGroup(COLLISION_GROUP_WORLD)
         self.interior=e
         self.findingpos = coroutine.create(self.FindPosition)
         coroutine.resume(self.findingpos,self,e)

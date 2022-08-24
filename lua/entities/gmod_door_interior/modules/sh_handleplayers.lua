@@ -48,6 +48,7 @@ if SERVER then
     end
     
     ENT:AddHook("Think", "handleplayers", function(self)
+        if not self._init then return end
         for k,v in pairs(player.GetAll()) do
             self:CheckPlayer(v)
         end
