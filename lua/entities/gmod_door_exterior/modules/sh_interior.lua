@@ -85,6 +85,11 @@ if SERVER then
     end)
     
     ENT:AddHook("Initialize", "interior", function(self)
+        if self:CallHook("ShouldSpawnInterior") == false then
+            self.intready=true
+            self:CallHook("InteriorReady",false)
+            return
+        end
         local e=ents.Create(self.Interior)
         e.spacecheck=true
         e.exterior=self
