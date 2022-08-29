@@ -38,6 +38,8 @@ if SERVER then
                 ply:SetEyeAngles(Angle(ang.p,ang.y,0))
                 ply:SetLocalVelocity(fwd*ply:GetVelocity():Length())
             end
+        else
+            ply:Spectate(OBS_MODE_ROAMING)
         end
         self:CallHook("PlayerEnter", ply, notp)
         if IsValid(self.interior) then
@@ -70,15 +72,12 @@ if SERVER then
                     ammo[s]=ply:GetAmmoCount(s)
                 end
             end
-            --[[ restoring active wep doesn't work clientside properly
             local activewep
             if IsValid(ply:GetActiveWeapon()) then
                 activewep=ply:GetActiveWeapon():GetClass()
             end
-            ]]--
-            
+            ply:Spectate(OBS_MODE_NONE)
             ply:Spawn()
-            
             ply:SetPos(pos)
             ply:SetEyeAngles(ang)
             ply:SetHealth(hp)
@@ -88,6 +87,9 @@ if SERVER then
             end
             for k,v in pairs(ammo) do
                 ply:SetAmmo(v,k)
+            end
+            if activewep then
+                ply:SelectWeapon(ply:GetWeapon(activewep))
             end
             ply.doors_cooldowncur=CurTime()+1
         end
@@ -126,6 +128,14 @@ if SERVER then
     ENT:AddHook("ShouldTeleportPortal", "players", function(self,portal,ent)
         if IsValid(ent) and ent:IsPlayer() and self:CallHook("CanPlayerEnter",ent)==false then
             return false
+        end
+    end)
+
+    ENT:AddHook("Think", "players", function(self)
+        for k,v in pairs(self.occupants) do
+            if not IsValid(self.interior) then
+                k:SetPos(self:GetPos())
+            end
         end
     end)
 else
