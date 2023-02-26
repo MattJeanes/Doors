@@ -67,6 +67,20 @@ if SERVER then
             end
         end
     end)
+
+    ENT:AddHook("OnRemove","inside_entities",function(self)
+        local inside_entities = ents.FindInBox(self:LocalToWorld(self:OBBMins()), self:LocalToWorld(self:OBBMaxs()))
+
+        for i,v in ipairs(inside_entities) do
+            local cl = v:GetClass()
+            if cl == "prop_physics" or cl == "prop_ragdoll" or v:IsNPC()
+                or string.StartsWith(cl, "weapon_")
+            then
+                v:Remove()
+            end
+        end
+    end)
+
 else
     ENT:AddHook("ShouldDraw", "handleplayers", function(self)
         if (LocalPlayer().doori~=self) and not wp.drawing and not self.contains[LocalPlayer().door] then
