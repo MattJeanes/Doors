@@ -1,25 +1,5 @@
 -- Cordon
 
-ENT:AddHook("PreRenderPortal", "cordon", function(self,portal)
-    if portal ~= self.portals.interior then return end
-    for k,v in pairs(self.props) do
-        if IsValid(k) then
-            k.olddraw=k:GetNoDraw()
-            k:SetNoDraw(true)
-        end
-    end
-end)
-
-ENT:AddHook("PostRenderPortal", "cordon", function(self,portal)
-    if portal ~= self.portals.interior then return end
-    for k,v in pairs(self.props) do
-        if IsValid(k) and k.olddraw~=nil then
-            k:SetNoDraw(k.olddraw)
-            k.olddraw=nil
-        end
-    end
-end)
-
 ENT:AddHook("Initialize", "cordon", function(self)
     self.props={}
     self.propscan=0
@@ -81,7 +61,11 @@ ENT:AddHook("OnRemove", "cordon", function(self)
         for k,v in pairs(self.props) do
             if IsValid(k) then
                 -- print("onremove",k)
-                k:SetNoDraw(false)
+                if SERVER then
+                    k:Remove()
+                else
+                    k:SetNoDraw(false)
+                end
                 self.props[k]=nil
             end
         end
@@ -93,6 +77,7 @@ ENT:AddHook("Think", "cordon", function(self)
         self.propscan=CurTime()+1
         self:UpdateCordon()
     end
+    if SERVER then return end
     local inside=LocalPlayer().doori==self or self.contains[LocalPlayer().door] or false
     for k,v in pairs(self.props) do
         if IsValid(k) and k:GetNoDraw()==inside then
@@ -102,10 +87,32 @@ ENT:AddHook("Think", "cordon", function(self)
     end
 end)
 
-ENT:AddHook("PlayerEnter", "cordon", function(self)
-    self:UpdateCordon()
-end)
+if CLIENT then
+    ENT:AddHook("PlayerEnter", "cordon", function(self)
+        self:UpdateCordon()
+    end)
+    
+    ENT:AddHook("PlayerExit", "cordon", function(self)
+        self:UpdateCordon()
+    end)
 
-ENT:AddHook("PlayerExit", "cordon", function(self)
-    self:UpdateCordon()
-end)
+    ENT:AddHook("PreRenderPortal", "cordon", function(self,portal)
+        if portal ~= self.portals.interior then return end
+        for k,v in pairs(self.props) do
+            if IsValid(k) then
+                k.olddraw=k:GetNoDraw()
+                k:SetNoDraw(true)
+            end
+        end
+    end)
+
+    ENT:AddHook("PostRenderPortal", "cordon", function(self,portal)
+        if portal ~= self.portals.interior then return end
+        for k,v in pairs(self.props) do
+            if IsValid(k) and k.olddraw~=nil then
+                k:SetNoDraw(k.olddraw)
+                k.olddraw=nil
+            end
+        end
+    end)
+end
