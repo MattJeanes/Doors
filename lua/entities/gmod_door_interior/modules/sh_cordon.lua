@@ -58,6 +58,7 @@ end
 
 ENT:AddHook("OnRemove", "cordon", function(self)
     if self.props then
+        self:UpdateCordon()
         for k,v in pairs(self.props) do
             if IsValid(k) then
                 -- print("onremove",k)
@@ -72,22 +73,21 @@ ENT:AddHook("OnRemove", "cordon", function(self)
     end
 end)
 
-ENT:AddHook("Think", "cordon", function(self)
-    if CurTime()>self.propscan then
-        self.propscan=CurTime()+1
-        self:UpdateCordon()
-    end
-    if SERVER then return end
-    local inside=LocalPlayer().doori==self or self.contains[LocalPlayer().door] or false
-    for k,v in pairs(self.props) do
-        if IsValid(k) and k:GetNoDraw()==inside then
-            -- Need to do this every frame unfortunately as GMod resets it really fast
-            k:SetNoDraw(not inside)
-        end
-    end
-end)
-
 if CLIENT then
+    ENT:AddHook("Think", "cordon", function(self)
+        if CurTime()>self.propscan then
+            self.propscan=CurTime()+1
+            self:UpdateCordon()
+        end
+        local inside=LocalPlayer().doori==self or self.contains[LocalPlayer().door] or false
+        for k,v in pairs(self.props) do
+            if IsValid(k) and k:GetNoDraw()==inside then
+                -- Need to do this every frame unfortunately as GMod resets it really fast
+                k:SetNoDraw(not inside)
+            end
+        end
+    end)
+
     ENT:AddHook("PlayerEnter", "cordon", function(self)
         self:UpdateCordon()
     end)
