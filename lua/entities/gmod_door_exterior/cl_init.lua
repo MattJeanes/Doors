@@ -2,7 +2,7 @@ include('shared.lua')
 
 function ENT:Draw()
     if self._init and self:CallHook("ShouldDraw")~=false then
-        self:CallHook("PreDraw")
+        if self:CallHook("PreDraw") == false then return end
         if self.CustomDrawModel then
             self:CustomDrawModel()
         else
