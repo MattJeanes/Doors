@@ -81,10 +81,17 @@ function ENT:Think()
             self.occupants[k]=nil
         end
     end
+
     self:CallHook("Think",CurTime()-self.lastthink)
     self.lastthink=CurTime()
     if self:CallHook("ShouldThinkFast") then
         self:NextThink(CurTime())
         return true
+    end
+
+    if not self._init then return end
+    if CurTime() >= (self.nextslowthink or 0) then
+        self.nextslowthink = CurTime() + 1
+        self:CallHook("SlowThink")
     end
 end
