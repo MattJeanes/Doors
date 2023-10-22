@@ -56,6 +56,21 @@ function ENT:UpdateCordon()
     end
 end
 
+if SERVER then
+    ENT:AddHook("PostInitialize","cordon",function(self)
+        self:UpdateCordon()
+        for k,v in pairs(self.props) do
+            if k.DoorsPhysicsFrozen then
+                k.DoorsPhysicsFrozen = false
+                local kph = k:GetPhysicsObject()
+                if IsValid(kph) then
+                    kph:EnableMotion(true)
+                end
+            end
+        end
+    end)
+end
+
 ENT:AddHook("OnRemove", "cordon", function(self)
     if self.props then
         self:UpdateCordon()
@@ -63,7 +78,15 @@ ENT:AddHook("OnRemove", "cordon", function(self)
             if IsValid(k) then
                 -- print("onremove",k)
                 if SERVER then
-                    k:Remove()
+                    if self:CallHook("ShouldRemoveProp",k) ~= false then
+                        k:Remove()
+                    else
+                        local kph = k:GetPhysicsObject()
+                        if IsValid(kph) then
+                            k.DoorsPhysicsFrozen = kph:IsMotionEnabled()
+                            kph:EnableMotion(false)
+                        end
+                    end
                 else
                     k:SetNoDraw(false)
                 end
