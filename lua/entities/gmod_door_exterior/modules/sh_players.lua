@@ -152,7 +152,7 @@ else
             LocalPlayer().doori=nil
         end
         
-        if IsValid(ext) then
+        if IsValid(ext) and ext._init then
             if enter then
                 ext:CallHook("PlayerEnter")
             else
@@ -160,7 +160,7 @@ else
             end
         end
         
-        if IsValid(int) then
+        if IsValid(int) and int._init then
             if enter then
                 int:CallHook("PlayerEnter")
             else
