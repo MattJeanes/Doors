@@ -71,6 +71,7 @@ function ENT:Initialize()
     self.occupants={}
     self.initqueue={}
     self.lastthink=CurTime()
+    self.nextslowthink=CurTime()
     
     self:CallHook("Initialize")
     self._init = true
@@ -90,14 +91,14 @@ function ENT:Think()
 
     self:CallHook("Think",CurTime()-self.lastthink)
     self.lastthink=CurTime()
+
+    if self._init and CurTime() >= self.nextslowthink then
+        self.nextslowthink = CurTime() + 1
+        self:CallHook("SlowThink")
+    end
+
     if self:CallHook("ShouldThinkFast") then
         self:NextThink(CurTime())
         return true
-    end
-
-    if not self._init then return end
-    if CurTime() >= (self.nextslowthink or 0) then
-        self.nextslowthink = CurTime() + 1
-        self:CallHook("SlowThink")
     end
 end
