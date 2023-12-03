@@ -98,7 +98,7 @@ end)
 
 if CLIENT then
     ENT:AddHook("Think", "cordon", function(self)
-        if CurTime()>self.propscan then
+        if self.propscan ~= nil and CurTime()>self.propscan then
             self.propscan=CurTime()+1
             self:UpdateCordon()
         end
