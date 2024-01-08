@@ -71,11 +71,9 @@ function ENT:Use(a,c)
     self:CallHook("Use",a,c)
 end
 
-function ENT:OnRemove()
-    -- https://wiki.facepunch.com/gmod/ENTITY:OnRemove#clientsidebehaviourremarks
-    timer.Simple(0, function()
-        if not IsValid(self) then
-            self:CallHook("OnRemove")
-        end
-    end)
+function ENT:OnRemove(fullUpdate)
+    if fullUpdate then
+        return -- https://wiki.facepunch.com/gmod/ENTITY:OnRemove#clientsidebehaviourremarks
+    end
+    self:CallHook("OnRemove")
 end
